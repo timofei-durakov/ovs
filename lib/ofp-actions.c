@@ -263,6 +263,12 @@ enum ofp_raw_action_type {
     OFPAT_RAW15_METER,
 
 /* ## ------------------------- ## */
+/* ## Open Kilda extension actions. ## */
+/* ## ------------------------- ## */
+    /* ONF1.3-1.4(3201): struct onf_action_swap_field, ... VLMFF */
+    OPK_RAW13_SWAP_FIELD,
+
+/* ## ------------------------- ## */
 /* ## Nicira extension actions. ## */
 /* ## ------------------------- ## */
 
@@ -470,6 +476,7 @@ ofpact_next_flattened(const struct ofpact *ofpact)
     case OFPACT_SET_L4_SRC_PORT:
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
+    case OFPACT_SWAP_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
     case OFPACT_DEC_TTL:
@@ -2458,6 +2465,26 @@ struct onf_action_copy_field {
      * The "pad3" member is the beginning of the above. */
     uint8_t pad3[4];            /* Not used. */
 };
+
+/* Action structure for OpenFlow 1.3 extension copy-field action.. */
+struct onf_action_swap_field {
+    ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
+    ovs_be16 len;               /* Length is padded to 64 bits. */
+    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be16 exp_type;          /* 3201. */
+    uint8_t pad[2];             /* Not used. */
+    ovs_be16 n_bits;            /* Number of bits to copy. */
+    ovs_be16 src_offset;        /* Starting bit offset in source. */
+    ovs_be16 dst_offset;        /* Starting bit offset in destination. */
+    uint8_t pad2[2];            /* Not used. */
+    /* Followed by:
+     * - OXM header for source field.
+     * - OXM header for destination field.
+     * - Padding with 0-bytes (either 0 or 4 of them) to a multiple of 8 bytes.
+     * The "pad3" member is the beginning of the above. */
+    uint8_t pad3[4];            /* Not used. */
+};
+
 OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
 
 /* Action structure for NXAST_REG_MOVE.
@@ -2608,6 +2635,42 @@ decode_copy_field__(ovs_be16 src_offset, ovs_be16 dst_offset, ovs_be16 n_bits,
 }
 
 static enum ofperr
+decode_swap_field__(ovs_be16 src_offset, ovs_be16 dst_offset, ovs_be16 n_bits,
+                    const void *action, ovs_be16 action_len, size_t oxm_offset,
+                    const struct vl_mff_map *vl_mff_map,
+                    uint64_t *tlv_bitmap, struct ofpbuf *ofpacts)
+{
+    struct ofpact_swap_field *move = ofpact_put_SWAP_FIELD(ofpacts);
+    enum ofperr error;
+
+    move->ofpact.raw = ONFACT_RAW13_COPY_FIELD;
+    move->src.ofs = ntohs(src_offset);
+    move->src.n_bits = ntohs(n_bits);
+    move->dst.ofs = ntohs(dst_offset);
+    move->dst.n_bits = ntohs(n_bits);
+
+    struct ofpbuf b = ofpbuf_const_initializer(action, ntohs(action_len));
+    ofpbuf_pull(&b, oxm_offset);
+
+    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &move->src.field, NULL,
+                                     tlv_bitmap);
+    if (error) {
+        return error;
+    }
+    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &move->dst.field, NULL,
+                                     tlv_bitmap);
+    if (error) {
+        return error;
+    }
+
+    if (!is_all_zeros(b.data, b.size)) {
+        return OFPERR_NXBRC_MUST_BE_ZERO;
+    }
+
+    return nxm_swap_field_check(move, NULL);
+}
+
+static enum ofperr
 decode_OFPAT_RAW15_COPY_FIELD(const struct ofp15_action_copy_field *oacf,
                               enum ofp_version ofp_version OVS_UNUSED,
                               const struct vl_mff_map *vl_mff_map,
@@ -2616,6 +2679,18 @@ decode_OFPAT_RAW15_COPY_FIELD(const struct ofp15_action_copy_field *oacf,
     return decode_copy_field__(oacf->src_offset, oacf->dst_offset,
                                oacf->n_bits, oacf, oacf->len,
                                OBJECT_OFFSETOF(oacf, pad2), vl_mff_map,
+                               tlv_bitmap, ofpacts);
+}
+
+static enum ofperr
+decode_OPK_RAW13_SWAP_FIELD(const struct onf_action_swap_field *oasf,
+                               enum ofp_version ofp_version OVS_UNUSED,
+                               const struct vl_mff_map *vl_mff_map,
+                               uint64_t *tlv_bitmap, struct ofpbuf *ofpacts)
+{
+    return decode_swap_field__(oasf->src_offset, oasf->dst_offset,
+                               oasf->n_bits, oasf, oasf->len,
+                               OBJECT_OFFSETOF(oasf, pad3), vl_mff_map,
                                tlv_bitmap, ofpacts);
 }
 
@@ -2707,6 +2782,24 @@ encode_REG_MOVE(const struct ofpact_reg_move *move,
     pad_ofpat(out, start_ofs);
 }
 
+static void
+encode_SWAP_FIELD(const struct ofpact_swap_field *move,
+                enum ofp_version ofp_version, struct ofpbuf *out)
+{
+    size_t start_ofs = out->size;
+
+    struct onf_action_swap_field *copy = put_OPK13_SWAP_FIELD(out);
+    copy->n_bits = htons(move->dst.n_bits);
+    copy->src_offset = htons(move->src.ofs);
+    copy->dst_offset = htons(move->dst.ofs);
+    out->size = out->size - sizeof copy->pad3;
+    nx_put_mff_header(out, move->src.field, ofp_version, false);
+    nx_put_mff_header(out, move->dst.field, ofp_version, false);
+
+    pad_ofpat(out, start_ofs);
+}
+
+
 static char * OVS_WARN_UNUSED_RESULT
 parse_REG_MOVE(const char *arg, const struct ofpact_parse_params *pp)
 {
@@ -2726,6 +2819,28 @@ check_REG_MOVE(const struct ofpact_reg_move *a,
                const struct ofpact_check_params *cp)
 {
     return nxm_reg_move_check(a, cp->match);
+}
+
+static char * OVS_WARN_UNUSED_RESULT
+parse_SWAP_FIELD(const char *arg, const struct ofpact_parse_params *pp)
+{
+    struct ofpact_swap_field *move = ofpact_put_SWAP_FIELD(pp->ofpacts);
+    return nxm_parse_swap_field(move, arg);
+}
+
+
+static void
+format_SWAP_FIELD(const struct ofpact_swap_field *a,
+                const struct ofpact_format_params *fp)
+{
+    nxm_format_swap_field(a, fp->s);
+}
+
+static enum ofperr
+check_SWAP_FIELD(const struct ofpact_swap_field *a,
+               const struct ofpact_check_params *cp)
+{
+    return nxm_swap_field_check(a, cp->match);
 }
 
 /* Action structure for OFPAT12_SET_FIELD. */
@@ -7940,6 +8055,7 @@ action_set_classify(const struct ofpact *a)
 
     case OFPACT_SET_FIELD:
     case OFPACT_REG_MOVE:
+    case OFPACT_SWAP_FIELD:
     case OFPACT_SET_ETH_DST:
     case OFPACT_SET_ETH_SRC:
     case OFPACT_SET_IP_DSCP:
@@ -8157,6 +8273,7 @@ ovs_instruction_type_from_ofpact_type(enum ofpact_type type,
     case OFPACT_SET_L4_SRC_PORT:
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
+    case OFPACT_SWAP_FIELD:
     case OFPACT_SET_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
@@ -8648,6 +8765,10 @@ ofpact_get_mf_dst(const struct ofpact *ofpact)
 
         orm = CONTAINER_OF(ofpact, struct ofpact_reg_move, ofpact);
         return orm->dst.field;
+    } else if (ofpact->type == OFPACT_SWAP_FIELD) {
+        const struct ofpact_swap_field *orm;
+        orm = CONTAINER_OF(ofpact, struct ofpact_swap_field, ofpact);
+        return orm->dst.field;
     }
 
     return NULL;
@@ -9062,6 +9183,7 @@ ofpact_outputs_to_port(const struct ofpact *ofpact, ofp_port_t port)
     case OFPACT_SET_L4_SRC_PORT:
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
+    case OFPACT_SWAP_FIELD:
     case OFPACT_SET_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:

@@ -29,6 +29,7 @@
 struct ds;
 struct match;
 struct ofpact_reg_move;
+struct ofpact_swap_field;
 struct ofpact_reg_load;
 struct ofpact_stack;
 struct ofpbuf;
@@ -118,9 +119,17 @@ void nx_format_field_name(enum mf_field_id, enum ofp_version, struct ds *);
 char *nxm_parse_reg_move(struct ofpact_reg_move *, const char *)
     OVS_WARN_UNUSED_RESULT;
 
+char *nxm_parse_swap_field(struct ofpact_swap_field *, const char *)
+OVS_WARN_UNUSED_RESULT;
+
 void nxm_format_reg_move(const struct ofpact_reg_move *, struct ds *);
 
+void nxm_format_swap_field(const struct ofpact_swap_field *, struct ds *);
+
 enum ofperr nxm_reg_move_check(const struct ofpact_reg_move *,
+                               const struct match *);
+
+enum ofperr nxm_swap_field_check(const struct ofpact_swap_field *,
                                const struct match *);
 
 void nxm_reg_load(const struct mf_subfield *, uint64_t src_data,
