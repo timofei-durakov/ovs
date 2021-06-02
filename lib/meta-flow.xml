@@ -2572,6 +2572,11 @@ actions=clone(load:0->NXM_OF_IN_PORT[],output:123)
       timestamp to receive time.
     </p>
 
+    <field id="MFF_OPK_UDP_PAYLOAD"
+           title="Open Kilda UDP packer payload"/>
+    <p>
+      Field contains first 128 bits of payload of UDP packet.
+    </p>
   </group>
 
   <group title="Connection Tracking">

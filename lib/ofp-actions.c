@@ -2530,6 +2530,7 @@ OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
  *   - NXM_NX_TUN_IPV4_SRC
  *   - NXM_NX_TUN_IPV4_DST
  *   - MFF_OPK_TIMESTAMP
+ *   - MFF_OPK_UDP_PAYLOAD
  *
  * The following nxm_header values are potentially acceptable as 'dst':
  *
@@ -2555,6 +2556,7 @@ OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
  *     header.
  *
  *   - NXM_OF_IN_PORT
+ *   - MFF_OPK_UDP_PAYLOAD
  *
  *   - NXM_NX_REG(idx) for idx in the switch's accepted range.
  *

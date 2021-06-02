@@ -203,6 +203,7 @@ bool
 mf_is_all_wild(const struct mf_field *mf, const struct flow_wildcards *wc)
 {
     switch (mf->id) {
+    case MFF_OPK_UDP_PAYLOAD:
     case MFF_OPK_TIMESTAMP:
         return true;
     case MFF_DP_HASH:
@@ -587,6 +588,7 @@ mf_is_value_valid(const struct mf_field *mf, const union mf_value *value)
     case MFF_ND_RESERVED:
     case MFF_ND_OPTIONS_TYPE:
     case MFF_OPK_TIMESTAMP:
+    case MFF_OPK_UDP_PAYLOAD:
         return true;
 
     case MFF_IN_PORT_OXM:
@@ -986,6 +988,9 @@ mf_get_value(const struct mf_field *mf, const struct flow *flow,
         value->be64 = htonll((timestamp.tv_sec << 32) + timestamp.tv_nsec);
         break;
     }
+    case MFF_OPK_UDP_PAYLOAD:
+        value->be64 = htonll(0x666777888999AAA); //TODO replace with real data
+        break;
     case MFF_N_IDS:
     default:
         OVS_NOT_REACHED();
@@ -1332,6 +1337,7 @@ mf_set_value(const struct mf_field *mf,
         MATCH_SET_FIELD_BE32(match, nsh.context[mf->id - MFF_NSH_C1],
                              value->be32);
         break;
+    case MFF_OPK_UDP_PAYLOAD:
     case MFF_OPK_TIMESTAMP:
         break;
 
@@ -1755,6 +1761,7 @@ mf_set_flow_value(const struct mf_field *mf,
         flow->nsh.context[mf->id - MFF_NSH_C1] = value->be32;
         break;
 
+    case MFF_OPK_UDP_PAYLOAD:
     case MFF_OPK_TIMESTAMP:
         break;
 
@@ -1903,6 +1910,7 @@ mf_is_pipeline_field(const struct mf_field *mf)
     case MFF_NSH_C3:
     case MFF_NSH_C4:
     case MFF_OPK_TIMESTAMP:
+    case MFF_OPK_UDP_PAYLOAD:
         return false;
 
     case MFF_N_IDS:
@@ -2289,6 +2297,7 @@ mf_set_wild(const struct mf_field *mf, struct match *match, char **err_str)
                                htonl(0), htonl(0));
         break;
     case MFF_OPK_TIMESTAMP:
+    case MFF_OPK_UDP_PAYLOAD:
         break;
 
     case MFF_N_IDS:
@@ -2372,6 +2381,7 @@ mf_set(const struct mf_field *mf,
     case MFF_ND_RESERVED:
     case MFF_ND_OPTIONS_TYPE:
     case MFF_OPK_TIMESTAMP:
+    case MFF_OPK_UDP_PAYLOAD:
         return OFPUTIL_P_NONE;
 
     case MFF_DP_HASH:
