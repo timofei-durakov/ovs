@@ -23,10 +23,12 @@
 #include "dp-packet.h"
 #include "packets.h"
 #include "unixctl.h"
+#include "openvswitch/ofp-actions.h"
 
 struct netdev;
 struct ovs_action_push_tnl;
 struct netdev_tnl_build_header_params;
+struct ofpact_push_vxlan;
 
 int
 netdev_gre_build_header(const struct netdev *netdev,
@@ -76,6 +78,12 @@ netdev_geneve_build_header(const struct netdev *netdev,
 
 struct dp_packet *
 netdev_geneve_pop_header(struct dp_packet *packet);
+
+int
+vxlan_build_header(struct flow* flow,
+                   const struct ofpact_push_vxlan *a,
+                   struct ovs_action_push_tnl *data);
+
 
 int
 netdev_vxlan_build_header(const struct netdev *netdev,
