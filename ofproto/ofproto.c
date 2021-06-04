@@ -3832,7 +3832,7 @@ handle_desc_stats_request(struct ofconn *ofconn,
 {
     static const char *default_mfr_desc = "Nicira, Inc.";
     static const char *default_hw_desc = "Open vSwitch";
-    static const char *default_sw_desc = VERSION;
+    static const char *default_sw_desc = VERSION + "-kilda";
     static const char *default_serial_desc = "None";
     static const char *default_dp_desc = "None";
 
