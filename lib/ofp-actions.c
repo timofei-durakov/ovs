@@ -265,7 +265,7 @@ enum ofp_raw_action_type {
 /* ## ------------------------- ## */
 /* ## Open Kilda extension actions. ## */
 /* ## ------------------------- ## */
-    /* ONF1.3-1.4(3201): struct onf_action_swap_field, ... VLMFF */
+    /* OPK1.3-1.4(3201): struct opk_action_swap_field, ... VLMFF */
     OPK_RAW13_SWAP_FIELD,
 
 /* ## ------------------------- ## */
@@ -2467,10 +2467,10 @@ struct onf_action_copy_field {
 };
 
 /* Action structure for OpenFlow 1.3 extension copy-field action.. */
-struct onf_action_swap_field {
+struct opk_action_swap_field {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
     ovs_be16 len;               /* Length is padded to 64 bits. */
-    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
     ovs_be16 exp_type;          /* 3201. */
     uint8_t pad[2];             /* Not used. */
     ovs_be16 n_bits;            /* Number of bits to copy. */
@@ -2640,24 +2640,24 @@ decode_swap_field__(ovs_be16 src_offset, ovs_be16 dst_offset, ovs_be16 n_bits,
                     const struct vl_mff_map *vl_mff_map,
                     uint64_t *tlv_bitmap, struct ofpbuf *ofpacts)
 {
-    struct ofpact_swap_field *move = ofpact_put_SWAP_FIELD(ofpacts);
+    struct ofpact_swap_field *swap = ofpact_put_SWAP_FIELD(ofpacts);
     enum ofperr error;
 
-    move->ofpact.raw = ONFACT_RAW13_COPY_FIELD;
-    move->src.ofs = ntohs(src_offset);
-    move->src.n_bits = ntohs(n_bits);
-    move->dst.ofs = ntohs(dst_offset);
-    move->dst.n_bits = ntohs(n_bits);
+    swap->ofpact.raw = ONFACT_RAW13_COPY_FIELD;
+    swap->src.ofs = ntohs(src_offset);
+    swap->src.n_bits = ntohs(n_bits);
+    swap->dst.ofs = ntohs(dst_offset);
+    swap->dst.n_bits = ntohs(n_bits);
 
     struct ofpbuf b = ofpbuf_const_initializer(action, ntohs(action_len));
     ofpbuf_pull(&b, oxm_offset);
 
-    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &move->src.field, NULL,
+    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &swap->src.field, NULL,
                                      tlv_bitmap);
     if (error) {
         return error;
     }
-    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &move->dst.field, NULL,
+    error = mf_vl_mff_nx_pull_header(&b, vl_mff_map, &swap->dst.field, NULL,
                                      tlv_bitmap);
     if (error) {
         return error;
@@ -2667,7 +2667,7 @@ decode_swap_field__(ovs_be16 src_offset, ovs_be16 dst_offset, ovs_be16 n_bits,
         return OFPERR_NXBRC_MUST_BE_ZERO;
     }
 
-    return nxm_swap_field_check(move, NULL);
+    return nxm_swap_field_check(swap, NULL);
 }
 
 static enum ofperr
@@ -2683,7 +2683,7 @@ decode_OFPAT_RAW15_COPY_FIELD(const struct ofp15_action_copy_field *oacf,
 }
 
 static enum ofperr
-decode_OPK_RAW13_SWAP_FIELD(const struct onf_action_swap_field *oasf,
+decode_OPK_RAW13_SWAP_FIELD(const struct opk_action_swap_field *oasf,
                                enum ofp_version ofp_version OVS_UNUSED,
                                const struct vl_mff_map *vl_mff_map,
                                uint64_t *tlv_bitmap, struct ofpbuf *ofpacts)
@@ -2783,18 +2783,18 @@ encode_REG_MOVE(const struct ofpact_reg_move *move,
 }
 
 static void
-encode_SWAP_FIELD(const struct ofpact_swap_field *move,
+encode_SWAP_FIELD(const struct ofpact_swap_field *swap,
                 enum ofp_version ofp_version, struct ofpbuf *out)
 {
     size_t start_ofs = out->size;
 
-    struct onf_action_swap_field *copy = put_OPK13_SWAP_FIELD(out);
-    copy->n_bits = htons(move->dst.n_bits);
-    copy->src_offset = htons(move->src.ofs);
-    copy->dst_offset = htons(move->dst.ofs);
-    out->size = out->size - sizeof copy->pad3;
-    nx_put_mff_header(out, move->src.field, ofp_version, false);
-    nx_put_mff_header(out, move->dst.field, ofp_version, false);
+    struct opk_action_swap_field *swap_action = put_OPK13_SWAP_FIELD(out);
+    swap_action->n_bits = htons(swap->dst.n_bits);
+    swap_action->src_offset = htons(swap->src.ofs);
+    swap_action->dst_offset = htons(swap->dst.ofs);
+    out->size = out->size - sizeof swap_action->pad3;
+    nx_put_mff_header(out, swap->src.field, ofp_version, false);
+    nx_put_mff_header(out, swap->dst.field, ofp_version, false);
 
     pad_ofpat(out, start_ofs);
 }
@@ -2824,8 +2824,8 @@ check_REG_MOVE(const struct ofpact_reg_move *a,
 static char * OVS_WARN_UNUSED_RESULT
 parse_SWAP_FIELD(const char *arg, const struct ofpact_parse_params *pp)
 {
-    struct ofpact_swap_field *move = ofpact_put_SWAP_FIELD(pp->ofpacts);
-    return nxm_parse_swap_field(move, arg);
+    struct ofpact_swap_field *swap = ofpact_put_SWAP_FIELD(pp->ofpacts);
+    return nxm_parse_swap_field(swap, arg);
 }
 
 
@@ -9720,7 +9720,8 @@ ofpact_decode_raw(enum ofp_version ofp_version,
     if (oah->type == htons(OFPAT_VENDOR)) {
         /* Get vendor. */
         hdrs.vendor = ntohl(oah->vendor);
-        if (hdrs.vendor == NX_VENDOR_ID || hdrs.vendor == ONF_VENDOR_ID) {
+        if (hdrs.vendor == NX_VENDOR_ID || hdrs.vendor == ONF_VENDOR_ID
+            || hdrs.vendor == OPK_VENDOR_ID) {
             /* Get extension subtype. */
             const struct ext_action_header *nah;
 
@@ -9847,7 +9848,8 @@ ofpact_put_raw(struct ofpbuf *buf, enum ofp_version ofp_version,
         break;
 
     case NX_VENDOR_ID:
-    case ONF_VENDOR_ID: {
+    case ONF_VENDOR_ID:
+    case OPK_VENDOR_ID: {
         struct ext_action_header *nah = (struct ext_action_header *) oah;
         nah->subtype = htons(hdrs->type);
         break;

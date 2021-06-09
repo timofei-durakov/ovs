@@ -1812,12 +1812,12 @@ nxm_parse_reg_move(struct ofpact_reg_move *move, const char *s)
 }
 
 char * OVS_WARN_UNUSED_RESULT
-nxm_parse_swap_field(struct ofpact_swap_field *move, const char *s)
+nxm_parse_swap_field(struct ofpact_swap_field *swap, const char *s)
 {
     const char *full_s = s;
     char *error;
 
-    error = mf_parse_subfield__(&move->src, &s);
+    error = mf_parse_subfield__(&swap->src, &s);
     if (error) {
         return error;
     }
@@ -1825,15 +1825,15 @@ nxm_parse_swap_field(struct ofpact_swap_field *move, const char *s)
         return xasprintf("%s: missing `->' following source", full_s);
     }
     s += 2;
-    error = mf_parse_subfield(&move->dst, s);
+    error = mf_parse_subfield(&swap->dst, s);
     if (error) {
         return error;
     }
 
-    if (move->src.n_bits != move->dst.n_bits) {
+    if (swap->src.n_bits != swap->dst.n_bits) {
         return xasprintf("%s: source field is %d bits wide but destination is "
                          "%d bits wide", full_s,
-                         move->src.n_bits, move->dst.n_bits);
+                         swap->src.n_bits, swap->dst.n_bits);
     }
     return NULL;
 }
@@ -1850,12 +1850,12 @@ nxm_format_reg_move(const struct ofpact_reg_move *move, struct ds *s)
 }
 
 void
-nxm_format_swap_field(const struct ofpact_swap_field *move, struct ds *s)
+nxm_format_swap_field(const struct ofpact_swap_field *swap, struct ds *s)
 {
     ds_put_format(s, "%sswap:%s", colors.special, colors.end);
-    mf_format_subfield(&move->src, s);
+    mf_format_subfield(&swap->src, s);
     ds_put_format(s, "%s->%s", colors.special, colors.end);
-    mf_format_subfield(&move->dst, s);
+    mf_format_subfield(&swap->dst, s);
 }
 
 
@@ -1875,17 +1875,17 @@ nxm_reg_move_check(const struct ofpact_reg_move *move,
 
 /* nxm_execute_reg_move(). */
 
-enum ofperr nxm_swap_field_check(const struct ofpact_swap_field *move,
+enum ofperr nxm_swap_field_check(const struct ofpact_swap_field *swap,
                    const struct match *match)
 {
     enum ofperr error;
 
-    error = mf_check_src(&move->src, match);
+    error = mf_check_src(&swap->src, match);
     if (error) {
         return error;
     }
 
-    return mf_check_dst(&move->dst, match);
+    return mf_check_dst(&swap->dst, match);
 }
 
 void
