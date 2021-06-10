@@ -5685,6 +5685,7 @@ reversible_actions(const struct ofpact *ofpacts, size_t ofpacts_len)
         case OFPACT_PUSH_MPLS:
         case OFPACT_PUSH_VLAN:
         case OFPACT_REG_MOVE:
+        case OFPACT_SWAP_FIELD:
         case OFPACT_RESUBMIT:
         case OFPACT_SAMPLE:
         case OFPACT_SET_ETH_DST:
@@ -6022,6 +6023,7 @@ freeze_unroll_actions(const struct ofpact *a, const struct ofpact *end,
         case OFPACT_NAT:
         case OFPACT_CHECK_PKT_LARGER:
         case OFPACT_DELETE_FIELD:
+        case OFPACT_SWAP_FIELD:
             /* These may not generate PACKET INs. */
             break;
 
@@ -6649,6 +6651,7 @@ recirc_for_mpls(const struct ofpact *a, struct xlate_ctx *ctx)
     case OFPACT_SET_L4_SRC_PORT:
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
+    case OFPACT_SWAP_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
     case OFPACT_DEC_TTL:
@@ -6698,6 +6701,14 @@ xlate_ofpact_reg_move(struct xlate_ctx *ctx, const struct ofpact_reg_move *a)
     mf_subfield_copy(&a->src, &a->dst, &ctx->xin->flow, ctx->wc);
     xlate_report_subfield(ctx, &a->dst);
 }
+
+static void
+xlate_ofpact_swap_field(struct xlate_ctx *ctx, const struct ofpact_swap_field *a)
+{
+    mf_subfield_swap(&a->src, &a->dst, &ctx->xin->flow, ctx->wc);
+    xlate_report_subfield(ctx, &a->dst);
+}
+
 
 static void
 xlate_ofpact_stack_pop(struct xlate_ctx *ctx, const struct ofpact_stack *a)
@@ -6942,6 +6953,9 @@ do_xlate_actions(const struct ofpact *ofpacts, size_t ofpacts_len,
 
         case OFPACT_REG_MOVE:
             xlate_ofpact_reg_move(ctx, ofpact_get_REG_MOVE(a));
+            break;
+        case OFPACT_SWAP_FIELD:
+            xlate_ofpact_swap_field(ctx, ofpact_get_SWAP_FIELD(a));
             break;
 
         case OFPACT_SET_FIELD:
