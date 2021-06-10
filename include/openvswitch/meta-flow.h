@@ -286,6 +286,20 @@ enum OVS_PACKED_ENUM mf_field_id {
      */
     MFF_OPK_TIMESTAMP,
 
+    /* "opk_udp_payload".
+     *
+     * Payload of UDB packet.
+     *
+     * Type: be64. // TODO replace with 128 bits field
+     * Maskable: no.
+     * Formatting: hexadecimal.
+     * Prerequisites: none.
+     * Access: read/write.
+     * NXM: none.
+     * OXM: OPKOXM_OF_UDP_PAYLOAD(2) since v2.15.
+     */
+    MFF_OPK_UDP_PAYLOAD,
+
     /* "conj_id".
      *
      * ID for "conjunction" actions.  Please refer to ovs-fields(7)
