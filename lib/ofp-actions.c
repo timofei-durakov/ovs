@@ -2529,6 +2529,7 @@ OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
  *   - NXM_NX_PKT_MARK
  *   - NXM_NX_TUN_IPV4_SRC
  *   - NXM_NX_TUN_IPV4_DST
+ *   - MFF_OPK_TIMESTAMP
  *
  * The following nxm_header values are potentially acceptable as 'dst':
  *

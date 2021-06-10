@@ -203,6 +203,8 @@ bool
 mf_is_all_wild(const struct mf_field *mf, const struct flow_wildcards *wc)
 {
     switch (mf->id) {
+    case MFF_OPK_TIMESTAMP:
+        return true;
     case MFF_DP_HASH:
         return !wc->masks.dp_hash;
     case MFF_RECIRC_ID:
@@ -584,6 +586,7 @@ mf_is_value_valid(const struct mf_field *mf, const union mf_value *value)
     case MFF_ND_TLL:
     case MFF_ND_RESERVED:
     case MFF_ND_OPTIONS_TYPE:
+    case MFF_OPK_TIMESTAMP:
         return true;
 
     case MFF_IN_PORT_OXM:
@@ -977,7 +980,12 @@ mf_get_value(const struct mf_field *mf, const struct flow *flow,
     case MFF_NSH_C4:
         value->be32 = flow->nsh.context[mf->id - MFF_NSH_C1];
         break;
-
+    case MFF_OPK_TIMESTAMP: {
+        struct timespec timestamp;
+        clock_gettime(CLOCK_REALTIME, &timestamp);
+        value->be64 = htonll((timestamp.tv_sec << 32) + timestamp.tv_nsec);
+        break;
+    }
     case MFF_N_IDS:
     default:
         OVS_NOT_REACHED();
@@ -1323,6 +1331,8 @@ mf_set_value(const struct mf_field *mf,
     case MFF_NSH_C4:
         MATCH_SET_FIELD_BE32(match, nsh.context[mf->id - MFF_NSH_C1],
                              value->be32);
+        break;
+    case MFF_OPK_TIMESTAMP:
         break;
 
     case MFF_N_IDS:
@@ -1745,6 +1755,9 @@ mf_set_flow_value(const struct mf_field *mf,
         flow->nsh.context[mf->id - MFF_NSH_C1] = value->be32;
         break;
 
+    case MFF_OPK_TIMESTAMP:
+        break;
+
     case MFF_N_IDS:
     default:
         OVS_NOT_REACHED();
@@ -1889,6 +1902,7 @@ mf_is_pipeline_field(const struct mf_field *mf)
     case MFF_NSH_C2:
     case MFF_NSH_C3:
     case MFF_NSH_C4:
+    case MFF_OPK_TIMESTAMP:
         return false;
 
     case MFF_N_IDS:
@@ -2274,6 +2288,8 @@ mf_set_wild(const struct mf_field *mf, struct match *match, char **err_str)
         MATCH_SET_FIELD_MASKED(match, nsh.context[mf->id - MFF_NSH_C1],
                                htonl(0), htonl(0));
         break;
+    case MFF_OPK_TIMESTAMP:
+        break;
 
     case MFF_N_IDS:
     default:
@@ -2355,6 +2371,7 @@ mf_set(const struct mf_field *mf,
     case MFF_ICMPV6_CODE:
     case MFF_ND_RESERVED:
     case MFF_ND_OPTIONS_TYPE:
+    case MFF_OPK_TIMESTAMP:
         return OFPUTIL_P_NONE;
 
     case MFF_DP_HASH:
