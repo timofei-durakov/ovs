@@ -127,6 +127,7 @@ odp_action_len(uint16_t type)
     case OVS_ACTION_ATTR_USERSPACE: return ATTR_LEN_VARIABLE;
     case OVS_ACTION_ATTR_PUSH_VLAN: return sizeof(struct ovs_action_push_vlan);
     case OVS_ACTION_ATTR_POP_VLAN: return 0;
+    case OVS_ACTION_ATTR_PUSH_VXLAN: return sizeof(struct ovs_action_push_vxlan);
     case OVS_ACTION_ATTR_PUSH_MPLS: return sizeof(struct ovs_action_push_mpls);
     case OVS_ACTION_ATTR_POP_MPLS: return sizeof(ovs_be16);
     case OVS_ACTION_ATTR_RECIRC: return sizeof(uint32_t);
@@ -1216,6 +1217,20 @@ format_odp_action(struct ds *ds, const struct nlattr *a,
     case OVS_ACTION_ATTR_POP_VLAN:
         ds_put_cstr(ds, "pop_vlan");
         break;
+    case OVS_ACTION_ATTR_PUSH_VXLAN: {
+        const struct ovs_action_push_vxlan *vxlan = nl_attr_get(a);
+        ds_put_cstr(ds, "push_vxlan(");
+
+        ds_put_format(ds, "eth(src="ETH_ADDR_FMT",dst="ETH_ADDR_FMT")",
+                      ETH_ADDR_ARGS(vxlan->addresses.eth_src),
+                      ETH_ADDR_ARGS(vxlan->addresses.eth_dst));
+        ds_put_format(ds, "vni=%d,",ntohl(vxlan->vni));
+        ds_put_format(ds, "ip(src="IP_FMT",dst="IP_FMT")", IP_ARGS(vxlan->ipv4.ipv4_src),
+                      IP_ARGS(vxlan->ipv4.ipv4_src));
+        ds_put_format(ds, "udp(src=%d,dst=%d)",ntohs(vxlan->udp.udp_src), ntohs(vxlan->udp.udp_dst));
+        ds_put_char(ds, ')');
+        break;
+    }
     case OVS_ACTION_ATTR_PUSH_MPLS: {
         const struct ovs_action_push_mpls *mpls = nl_attr_get(a);
         ds_put_cstr(ds, "push_mpls(");
@@ -7667,6 +7682,28 @@ odp_put_tnl_push_action(struct ofpbuf *odp_actions,
     nl_msg_put_unspec(odp_actions, OVS_ACTION_ATTR_TUNNEL_PUSH, data, size);
 }
 
+void
+odp_put_push_vxlan(struct ofpbuf *odp_actions,
+                   const struct ofpact_push_vxlan *data)
+{
+    struct ovs_action_push_vxlan vxlan;
+    vxlan.vni = data->vni;
+    struct ovs_key_ethernet eth;
+    eth.eth_dst = data->eth_dst;
+    eth.eth_src = data->eth_src;
+    vxlan.addresses =  eth;
+    struct ovs_key_ipv4 ipv4;
+    ipv4.ipv4_src = data->src_ipv4;
+    ipv4.ipv4_dst = data->dst_ipv4;
+    vxlan.ipv4 = ipv4;
+    struct ovs_key_udp udp;
+    udp.udp_dst = htons(4789);
+    udp.udp_src = data->udp_src;
+    vxlan.udp = udp;
+
+    nl_msg_put_unspec(odp_actions, OVS_ACTION_ATTR_PUSH_VXLAN, &vxlan, sizeof vxlan);
+}
+
 
 /* The commit_odp_actions() function and its helpers. */
 
@@ -8664,6 +8701,8 @@ commit_odp_actions(const struct flow *flow, struct flow *base,
         commit_mpls_action(flow, base, odp_actions);
     }
     commit_vlan_action(flow, base, odp_actions, wc);
+    // TODO: figure out whether we need it really for vxlan push action.
+
     commit_set_priority_action(flow, base, odp_actions, wc, use_masked);
     commit_set_pkt_mark_action(flow, base, odp_actions, wc, use_masked);
 

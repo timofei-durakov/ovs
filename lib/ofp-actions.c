@@ -2959,7 +2959,6 @@ parse_PUSH_VXLAN(char *arg OVS_UNUSED, const struct ofpact_parse_params *pp OVS_
         char *key = value_end + strlen("->");
         size_t value_len = strcspn(value, "->");
         value[value_len] = '\0';
-        printf("%s", key);
 
         if (strcmp("vni", key) == 0) {
             pVxlan->vni = htonl(atoi(value));

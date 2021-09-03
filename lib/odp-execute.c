@@ -807,6 +807,7 @@ requires_datapath_assistance(const struct nlattr *a)
     case OVS_ACTION_ATTR_SET_MASKED:
     case OVS_ACTION_ATTR_PUSH_VLAN:
     case OVS_ACTION_ATTR_POP_VLAN:
+    case OVS_ACTION_ATTR_PUSH_VXLAN:
     case OVS_ACTION_ATTR_SAMPLE:
     case OVS_ACTION_ATTR_HASH:
     case OVS_ACTION_ATTR_PUSH_MPLS:
@@ -938,6 +939,15 @@ odp_execute_actions(void *dp, struct dp_packet_batch *batch, bool steal,
                 eth_pop_vlan(packet);
             }
             break;
+
+        case OVS_ACTION_ATTR_PUSH_VXLAN: {
+            const struct ovs_action_push_vxlan *vxlan = nl_attr_get(a);
+
+            DP_PACKET_BATCH_FOR_EACH (i, packet, batch) {
+                    push_vxlan(packet, vxlan);
+                }
+            break;
+        }
 
         case OVS_ACTION_ATTR_PUSH_MPLS: {
             const struct ovs_action_push_mpls *mpls = nl_attr_get(a);

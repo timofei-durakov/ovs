@@ -863,6 +863,22 @@ enum ovs_ct_attr {
 #define OVS_CT_ATTR_MAX (__OVS_CT_ATTR_MAX - 1)
 
 /*
+ * struct ovs_action_push_vxlan - %OVS_ACTION_ATTR_PUSH_VXLAN action argument.
+ * @addresses: Source and destination MAC addresses.
+ * @ipv4: ipv4 header data.
+ * @udp: udp header ports data.
+ * @vni - vxlan vni.
+
+ */
+struct ovs_action_push_vxlan {
+    struct ovs_key_ethernet addresses;
+    struct ovs_key_ipv4 ipv4;
+    struct ovs_key_udp udp;
+    __be32 vni;
+};
+
+
+/*
  * struct ovs_action_push_eth - %OVS_ACTION_ATTR_PUSH_ETH action argument.
  * @addresses: Source and destination MAC addresses.
  */
@@ -1011,7 +1027,8 @@ enum ovs_action_attr {
 	OVS_ACTION_ATTR_SET,          /* One nested OVS_KEY_ATTR_*. */
 	OVS_ACTION_ATTR_PUSH_VLAN,    /* struct ovs_action_push_vlan. */
 	OVS_ACTION_ATTR_POP_VLAN,     /* No argument. */
-	OVS_ACTION_ATTR_SAMPLE,       /* Nested OVS_SAMPLE_ATTR_*. */
+    OVS_ACTION_ATTR_PUSH_VXLAN,   /* struct ovs_action_push_vxlan. */
+    OVS_ACTION_ATTR_SAMPLE,       /* Nested OVS_SAMPLE_ATTR_*. */
 	OVS_ACTION_ATTR_RECIRC,       /* u32 recirc_id. */
 	OVS_ACTION_ATTR_HASH,	      /* struct ovs_action_hash. */
 	OVS_ACTION_ATTR_PUSH_MPLS,    /* struct ovs_action_push_mpls. */

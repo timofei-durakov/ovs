@@ -89,6 +89,7 @@ static bool actions_may_change_flow(const struct nlattr *actions)
 		case OVS_ACTION_ATTR_PUSH_MPLS:
 		case OVS_ACTION_ATTR_PUSH_NSH:
 		case OVS_ACTION_ATTR_PUSH_VLAN:
+		case OVS_ACTION_ATTR_PUSH_VXLAN:
 		case OVS_ACTION_ATTR_SAMPLE:
 		case OVS_ACTION_ATTR_SET:
 		case OVS_ACTION_ATTR_SET_MASKED:
@@ -3004,6 +3005,7 @@ static int __ovs_nla_copy_actions(struct net *net, const struct nlattr *attr,
 			[OVS_ACTION_ATTR_METER] = sizeof(u32),
 			[OVS_ACTION_ATTR_CLONE] = (u32)-1,
 			[OVS_ACTION_ATTR_CHECK_PKT_LEN] = (u32)-1,
+			[OVS_ACTION_ATTR_PUSH_VXLAN] = sizeof(struct ovs_action_push_vxlan)
 		};
 		const struct ovs_action_push_vlan *vlan;
 		int type = nla_type(a);
@@ -3067,6 +3069,9 @@ static int __ovs_nla_copy_actions(struct net *net, const struct nlattr *attr,
 				return -EINVAL;
 			vlan_tci = vlan->vlan_tci;
 			break;
+
+        case OVS_ACTION_ATTR_PUSH_VXLAN:
+                break;
 
 		case OVS_ACTION_ATTR_RECIRC:
 			break;

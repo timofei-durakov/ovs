@@ -37,6 +37,7 @@
 #include <net/dsfield.h>
 #include <net/mpls.h>
 #include <net/sctp/checksum.h>
+#include <net/vxlan.h>
 
 #include "datapath.h"
 #include "conntrack.h"
@@ -450,6 +451,78 @@ static void set_ip_addr(struct sk_buff *skb, struct iphdr *nh,
 	csum_replace4(&nh->check, *addr, new_addr);
 	skb_clear_hash(skb);
 	*addr = new_addr;
+}
+
+static int push_vxlan(struct sk_buff *skb, struct sw_flow_key *key,
+                      const struct ovs_action_push_vxlan *vxlan)
+{
+    struct ethhdr *ehdr;
+    struct iphdr *ihdr;
+    struct udphdr *uhdr;
+    u8 buffer[VXLAN_HLEN];
+    struct vxlanhdr *vxhdr;
+    struct vxlanhdr *proto_vxhdr = (struct vxlanhdr *)buffer;
+
+    proto_vxhdr->vx_vni = vxlan->vni >> 8;
+    proto_vxhdr->vx_flags = htonl(201326595);
+
+    /* Add the new Ethernet header */
+    if (skb_cow_head(skb, VXLAN_HLEN) < 0)
+        return -ENOMEM;
+
+    skb_ensure_writable(skb, skb_transport_offset(skb) +
+                             sizeof (struct vxlanhdr));
+    skb_push(skb, sizeof(struct vxlanhdr));
+    vxhdr = (struct vxlanhdr *)(skb->data);
+    memcpy(vxhdr, proto_vxhdr, sizeof(struct vxlanhdr));
+
+    skb_push(skb, sizeof(*uhdr));
+    skb_reset_transport_header(skb);
+
+    skb_ensure_writable(skb, skb_transport_offset(skb) +
+                             sizeof(struct udphdr));
+    uhdr = udp_hdr(skb);
+    uhdr->source = vxlan->udp.udp_src;
+    uhdr->dest = vxlan->udp.udp_dst;
+    uhdr->len = htons(skb->len);
+    key->tp.src = vxlan->udp.udp_src;
+    key->tp.dst = vxlan->udp.udp_dst;
+
+    skb_postpush_rcsum(skb, uhdr, sizeof(*uhdr) + sizeof(*vxhdr));
+
+    if (skb_cow_head(skb, sizeof(*ihdr)) < 0)
+        return -ENOMEM;
+
+    skb_push(skb, sizeof(*ihdr));
+    skb_reset_network_header(skb);
+    skb_ensure_writable(skb, skb_network_offset(skb) +
+                             sizeof(struct iphdr));
+    ihdr = ip_hdr(skb);
+    ihdr->version = 4;
+    ihdr->ihl = sizeof (struct iphdr) / 4;
+    ihdr->protocol = 17;
+    ihdr->ttl = 64;
+    ihdr->id = htons(1);
+    ihdr->tot_len = htons(skb->len);
+    set_ip_addr(skb, ihdr, &ihdr->saddr, vxlan->ipv4.ipv4_src);
+    key->ipv4.addr.src = vxlan->ipv4.ipv4_src;
+    set_ip_addr(skb, ihdr, &ihdr->daddr, vxlan->ipv4.ipv4_dst);
+    key->ipv4.addr.dst = vxlan->ipv4.ipv4_dst;
+    skb_postpush_rcsum(skb, ihdr, sizeof(*ihdr));
+
+    if (skb_cow_head(skb, sizeof(*ehdr)) < 0)
+        return -ENOMEM;
+    skb_push(skb, sizeof(*ehdr));
+    skb_reset_mac_header(skb);
+    skb_reset_mac_len(skb);
+    ehdr = eth_hdr(skb);
+    ether_addr_copy(ehdr->h_source, vxlan->addresses.eth_src);
+    ether_addr_copy(ehdr->h_dest, vxlan->addresses.eth_dst);
+    ehdr->h_proto = skb->protocol;
+    skb_postpush_rcsum(skb, ehdr, sizeof(*ehdr));
+    key->mac_proto = MAC_PROTO_ETHERNET;
+    invalidate_flow_key(key);
+    return 0;
 }
 
 static void update_ipv6_checksum(struct sk_buff *skb, u8 l4_proto,
@@ -1324,6 +1397,10 @@ static int do_execute_actions(struct datapath *dp, struct sk_buff *skb,
 		case OVS_ACTION_ATTR_POP_VLAN:
 			err = pop_vlan(skb, key);
 			break;
+
+        case OVS_ACTION_ATTR_PUSH_VXLAN:
+            err = push_vxlan(skb, key, nla_data(a));
+            break;
 
 		case OVS_ACTION_ATTR_RECIRC: {
 			bool last = nla_is_last(a, rem);

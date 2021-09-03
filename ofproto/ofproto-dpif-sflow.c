@@ -1195,6 +1195,11 @@ dpif_sflow_read_actions(const struct flow *flow,
              * captures the egress VLAN ID so there is nothing more to do here.
              */
             break;
+        case OVS_ACTION_ATTR_PUSH_VXLAN:
+            /*
+             * TODO: handle push_vxlan action for sflow.
+             */
+            break;
 
         case OVS_ACTION_ATTR_PUSH_MPLS: {
             const struct ovs_action_push_mpls *mpls = nl_attr_get(a);

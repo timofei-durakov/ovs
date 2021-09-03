@@ -336,6 +336,8 @@ void compose_rarp(struct dp_packet *, const struct eth_addr);
 void eth_push_vlan(struct dp_packet *, ovs_be16 tpid, ovs_be16 tci);
 void eth_pop_vlan(struct dp_packet *);
 
+void push_vxlan(struct dp_packet *, const struct ovs_action_push_vxlan *);
+
 const char *eth_from_hex(const char *hex, struct dp_packet **packetp);
 void eth_format_masked(const struct eth_addr ea,
                        const struct eth_addr *mask, struct ds *s);
