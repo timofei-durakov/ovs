@@ -453,6 +453,16 @@ static void set_ip_addr(struct sk_buff *skb, struct iphdr *nh,
 	*addr = new_addr;
 }
 
+static int pop_vxlan(struct sk_buff *skb, struct sw_flow_key *key) {
+    skb_pull_rcsum(skb, ETH_HLEN + sizeof (struct iphdr) + sizeof (struct udphdr) + sizeof (struct vxlanhdr));
+    skb_reset_mac_header(skb);
+    skb_reset_mac_len(skb);
+    skb_reset_network_header(skb);
+    skb_reset_transport_header(skb);
+    return 0;
+}
+
+
 static int push_vxlan(struct sk_buff *skb, struct sw_flow_key *key,
                       const struct ovs_action_push_vxlan *vxlan)
 {
@@ -1400,6 +1410,10 @@ static int do_execute_actions(struct datapath *dp, struct sk_buff *skb,
 
         case OVS_ACTION_ATTR_PUSH_VXLAN:
             err = push_vxlan(skb, key, nla_data(a));
+            break;
+
+        case OVS_ACTION_ATTR_POP_VXLAN:
+            err = pop_vxlan(skb, key);
             break;
 
 		case OVS_ACTION_ATTR_RECIRC: {

@@ -128,6 +128,7 @@ odp_action_len(uint16_t type)
     case OVS_ACTION_ATTR_PUSH_VLAN: return sizeof(struct ovs_action_push_vlan);
     case OVS_ACTION_ATTR_POP_VLAN: return 0;
     case OVS_ACTION_ATTR_PUSH_VXLAN: return sizeof(struct ovs_action_push_vxlan);
+    case OVS_ACTION_ATTR_POP_VXLAN: return 0;
     case OVS_ACTION_ATTR_PUSH_MPLS: return sizeof(struct ovs_action_push_mpls);
     case OVS_ACTION_ATTR_POP_MPLS: return sizeof(ovs_be16);
     case OVS_ACTION_ATTR_RECIRC: return sizeof(uint32_t);
@@ -1231,6 +1232,9 @@ format_odp_action(struct ds *ds, const struct nlattr *a,
         ds_put_char(ds, ')');
         break;
     }
+    case OVS_ACTION_ATTR_POP_VXLAN:
+        ds_put_cstr(ds, "pop_vlan");
+        break;
     case OVS_ACTION_ATTR_PUSH_MPLS: {
         const struct ovs_action_push_mpls *mpls = nl_attr_get(a);
         ds_put_cstr(ds, "push_mpls(");
@@ -7702,6 +7706,12 @@ odp_put_push_vxlan(struct ofpbuf *odp_actions,
     vxlan.udp = udp;
 
     nl_msg_put_unspec(odp_actions, OVS_ACTION_ATTR_PUSH_VXLAN, &vxlan, sizeof vxlan);
+}
+
+void
+odp_put_pop_vxlan(struct ofpbuf *odp_actions)
+{
+    nl_msg_put_flag(odp_actions, OVS_ACTION_ATTR_POP_VXLAN);
 }
 
 

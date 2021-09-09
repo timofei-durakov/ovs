@@ -6757,89 +6757,16 @@ xlate_ofpact_reg_move(struct xlate_ctx *ctx, const struct ofpact_reg_move *a)
 static void
 xlate_ofpact_push_vxlan(OVS_UNUSED struct xlate_ctx *ctx, OVS_UNUSED const struct ofpact_push_vxlan *a)
 {
-    struct ovs_action_push_tnl tnl_push_data;
-//    bool truncate = false;
-
-    tnl_push_data.tnl_port = 0;
-    tnl_push_data.out_port = 0;
-    vxlan_build_header(&ctx->xin->flow, a, &tnl_push_data);
     propagate_tunnel_data_to_flow_for_vxlan(ctx, a->eth_dst, a->eth_src,
                                   a->src_ipv4, a->dst_ipv4);
 
-//    size_t clone_ofs = 0;
-//    size_t push_action_size;
-
     odp_put_push_vxlan(ctx->odp_actions, a);
-//    push_action_size = ctx->odp_actions->size;
-
-//    if (!truncate) {
-//        const struct dpif_flow_stats *backup_resubmit_stats;
-//        struct xlate_cache *backup_xcache;
-//        struct flow_wildcards *backup_wc;
-//        struct flow_wildcards wc;
-//        bool backup_side_effects;
-//        const struct dp_packet *backup_packet;
-//
-//        memset(&wc, 0 , sizeof wc);
-//        backup_wc = ctx->wc;
-//        ctx->wc = &wc;
-//        ctx->xin->wc = NULL;
-//        backup_resubmit_stats = ctx->xin->resubmit_stats;
-//        backup_xcache = ctx->xin->xcache;
-//        backup_side_effects = ctx->xin->allow_side_effects;
-//        backup_packet = ctx->xin->packet;
-//
-//        ctx->xin->resubmit_stats =  NULL;
-//        ctx->xin->xcache = xlate_cache_new(); /* Use new temporary cache. */
-//        ctx->xin->allow_side_effects = false;
-//        ctx->xin->packet = NULL;
-//
-//        /* Push the cache entry for the tunnel first. */
-//        struct xc_entry *entry;
-//        entry = xlate_cache_add_entry(ctx->xin->xcache, XC_TUNNEL_HEADER);
-//        entry->tunnel_hdr.hdr_size = tnl_push_data.header_len;
-//        entry->tunnel_hdr.operation = ADD;
-//
-//        /* Similar to the stats update in revalidation, the x_cache entries
-//         * are populated by the previous translation are used to update the
-//         * stats correctly.
-//         */
-//        if (backup_resubmit_stats) {
-//            struct dpif_flow_stats stats = *backup_resubmit_stats;
-//            xlate_push_stats(ctx->xin->xcache, &stats, false);
-//        }
-//        xlate_cache_steal_entries(backup_xcache, ctx->xin->xcache);
-//
-//        if (ctx->odp_actions->size > push_action_size) {
-//
-//        } else {
-//            nl_msg_cancel_nested(ctx->odp_actions, clone_ofs);
-//        }
-//
-//        /* Restore context status. */
-//        ctx->xin->resubmit_stats = backup_resubmit_stats;
-//        xlate_cache_delete(ctx->xin->xcache);
-//        ctx->xin->xcache = backup_xcache;
-//        ctx->xin->allow_side_effects = backup_side_effects;
-//        ctx->xin->packet = backup_packet;
-//        ctx->wc = backup_wc;
-//    } else {
-//        /* In order to maintain accurate stats, use recirc for
-//         * natvie tunneling.  */
-//        nl_msg_put_u32(ctx->odp_actions, OVS_ACTION_ATTR_RECIRC, 0);
-//        nl_msg_end_nested(ctx->odp_actions, clone_ofs);
-//    }
-    /* Restore the flows after the translation. */
-//    memcpy(&ctx->xin->flow, &old_flow, sizeof ctx->xin->flow);
-//    memcpy(&ctx->base_flow, &old_base_flow, sizeof ctx->base_flow);
-
-
 }
 
 static void
 xlate_ofpact_pop_vxlan(OVS_UNUSED struct xlate_ctx *ctx)
 {
-
+    odp_put_pop_vxlan(ctx->odp_actions);
 }
 
 static void

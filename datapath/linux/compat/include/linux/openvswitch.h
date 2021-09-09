@@ -1028,6 +1028,7 @@ enum ovs_action_attr {
 	OVS_ACTION_ATTR_PUSH_VLAN,    /* struct ovs_action_push_vlan. */
 	OVS_ACTION_ATTR_POP_VLAN,     /* No argument. */
     OVS_ACTION_ATTR_PUSH_VXLAN,   /* struct ovs_action_push_vxlan. */
+    OVS_ACTION_ATTR_POP_VXLAN,    /* No argument. */
     OVS_ACTION_ATTR_SAMPLE,       /* Nested OVS_SAMPLE_ATTR_*. */
 	OVS_ACTION_ATTR_RECIRC,       /* u32 recirc_id. */
 	OVS_ACTION_ATTR_HASH,	      /* struct ovs_action_hash. */

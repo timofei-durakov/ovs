@@ -266,6 +266,10 @@ void push_vxlan(struct dp_packet *packet OVS_UNUSED, const struct ovs_action_pus
 
 }
 
+void pop_vxlan(struct dp_packet *packet OVS_UNUSED) {
+
+}
+
 
 /* Push Ethernet header onto 'packet' assuming it is layer 3 */
 void
