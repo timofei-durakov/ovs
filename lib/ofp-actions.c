@@ -2497,10 +2497,10 @@ struct opk_action_swap_field {
 };
 
 /* Action structure for OpenFlow 1.3 extension push vxlan. */
-struct opk_action_push_vxlan {
+struct  opk_action_push_vxlan {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
     ovs_be16 len;               /* Length is padded to 64 bits. */
-    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
     ovs_be16 exp_type;          /* 3202. */
     struct eth_addr eth_src;
     struct eth_addr eth_dst;
@@ -2515,7 +2515,7 @@ struct opk_action_push_vxlan {
 struct opk_action_pop_vxlan {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
     ovs_be16 len;               /* Length is padded to 64 bits. */
-    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
     ovs_be16 exp_type;          /* 3203. */
     uint8_t pad[6];             /* Not used. */
 };

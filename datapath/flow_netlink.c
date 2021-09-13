@@ -185,7 +185,8 @@ static bool match_validate(const struct sw_flow_match *match,
 			| (1ULL << OVS_KEY_ATTR_ARP)
 			| (1ULL << OVS_KEY_ATTR_ND)
 			| (1ULL << OVS_KEY_ATTR_MPLS)
-			| (1ULL << OVS_KEY_ATTR_NSH));
+			| (1ULL << OVS_KEY_ATTR_NSH)
+            | (1ULL << OVS_KEY_ATTR_VXLAN_VNI));
 
 	/* Always allowed mask fields. */
 	mask_allowed |= ((1ULL << OVS_KEY_ATTR_TUNNEL)
@@ -384,7 +385,8 @@ size_t ovs_key_attr_size(void)
 		+ nla_total_size(2)   /* OVS_KEY_ATTR_ETHERTYPE */
 		+ nla_total_size(40)  /* OVS_KEY_ATTR_IPV6 */
 		+ nla_total_size(2)   /* OVS_KEY_ATTR_ICMPV6 */
-		+ nla_total_size(28); /* OVS_KEY_ATTR_ND */
+		+ nla_total_size(28)  /* OVS_KEY_ATTR_ND */
+		+ nla_total_size(2);  /* OVS_KEY_ATTR_VXLAN_VNI */
 }
 
 static const struct ovs_len_tbl ovs_vxlan_ext_key_lens[OVS_VXLAN_EXT_MAX + 1] = {
@@ -451,6 +453,7 @@ static const struct ovs_len_tbl ovs_key_lens[OVS_KEY_ATTR_MAX + 1] = {
 		.len = sizeof(struct ovs_key_ct_tuple_ipv6) },
 	[OVS_KEY_ATTR_NSH]       = { .len = OVS_ATTR_NESTED,
 				     .next = ovs_nsh_key_attr_lens, },
+    [OVS_KEY_ATTR_VXLAN_VNI] = { .len = sizeof(u16)},
 };
 
 static bool check_attr_len(unsigned int attr_len, unsigned int expected_len)

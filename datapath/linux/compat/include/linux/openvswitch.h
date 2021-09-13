@@ -392,6 +392,7 @@ enum ovs_key_attr {
 	OVS_KEY_ATTR_ND_EXTENSIONS, /* struct ovs_key_nd_extensions */
 #endif
 
+    OVS_KEY_ATTR_VXLAN_VNI, /* be16 VXLAN vni. */
 	__OVS_KEY_ATTR_MAX
 };
 

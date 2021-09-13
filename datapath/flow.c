@@ -606,6 +606,7 @@ static int key_extract_l3l4(struct sk_buff *skb, struct sw_flow_key *key)
 				struct udphdr *udp = udp_hdr(skb);
 				key->tp.src = udp->source;
 				key->tp.dst = udp->dest;
+				key->vxlan_vni = htons(123);
 			} else {
 				memset(&key->tp, 0, sizeof(key->tp));
 			}
@@ -732,6 +733,7 @@ static int key_extract_l3l4(struct sk_buff *skb, struct sw_flow_key *key)
 				struct udphdr *udp = udp_hdr(skb);
 				key->tp.src = udp->source;
 				key->tp.dst = udp->dest;
+                key->vxlan_vni = htons(123);
 			} else {
 				memset(&key->tp, 0, sizeof(key->tp));
 			}
@@ -896,7 +898,7 @@ int ovs_flow_key_extract(const struct ip_tunnel_info *tun_info,
 	} else  {
 		key->tun_proto = 0;
 		key->tun_opts_len = 0;
-		memset(&key->tun_key, 0, sizeof(key->tun_key));
+//		memset(&key->tun_key, 0, sizeof(key->tun_key));
 	}
 
 	key->phy.priority = skb->priority;

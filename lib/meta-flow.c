@@ -373,7 +373,8 @@ mf_is_all_wild(const struct mf_field *mf, const struct flow_wildcards *wc)
         return !wc->masks.tp_dst;
     case MFF_TCP_FLAGS:
         return !wc->masks.tcp_flags;
-
+    case MFF_VXLAN_VNI:
+        return !wc->masks.vxlan_vni;
     case MFF_NSH_FLAGS:
         return !wc->masks.nsh.flags;
     case MFF_NSH_TTL:
@@ -584,6 +585,7 @@ mf_is_value_valid(const struct mf_field *mf, const union mf_value *value)
     case MFF_ND_TLL:
     case MFF_ND_RESERVED:
     case MFF_ND_OPTIONS_TYPE:
+    case MFF_VXLAN_VNI:
         return true;
 
     case MFF_IN_PORT_OXM:
@@ -926,6 +928,9 @@ mf_get_value(const struct mf_field *mf, const struct flow *flow,
     case MFF_SCTP_DST:
         value->be16 = flow->tp_dst;
         break;
+    case MFF_VXLAN_VNI:
+        value->be16 = flow->vxlan_vni;
+        break;
 
     case MFF_TCP_FLAGS:
     case MFF_ND_OPTIONS_TYPE:
@@ -1265,6 +1270,10 @@ mf_set_value(const struct mf_field *mf,
         match_set_tp_src(match, value->be16);
         break;
 
+    case MFF_VXLAN_VNI:
+        match_set_vxlan_vni(match, value->be16);
+        break;
+
     case MFF_TCP_DST:
     case MFF_UDP_DST:
     case MFF_SCTP_DST:
@@ -1551,7 +1560,9 @@ mf_set_flow_value(const struct mf_field *mf,
     case MFF_CT_TP_DST:
         flow->ct_tp_dst = value->be16;
         break;
-
+    case MFF_VXLAN_VNI:
+        flow->vxlan_vni = value->be16;
+        break;
     CASE_MFF_REGS:
         flow->regs[mf->id - MFF_REG0] = ntohl(value->be32);
         break;
@@ -1868,6 +1879,7 @@ mf_is_pipeline_field(const struct mf_field *mf)
     case MFF_TCP_FLAGS:
     case MFF_UDP_SRC:
     case MFF_UDP_DST:
+    case MFF_VXLAN_VNI:
     case MFF_SCTP_SRC:
     case MFF_SCTP_DST:
     case MFF_ICMPV4_TYPE:
@@ -2226,6 +2238,11 @@ mf_set_wild(const struct mf_field *mf, struct match *match, char **err_str)
         match->flow.tp_src = htons(0);
         break;
 
+    case MFF_VXLAN_VNI:
+        match->wc.masks.vxlan_vni = htons(0);
+        match->flow.vxlan_vni = htons(0);
+        break;
+
     case MFF_TCP_DST:
     case MFF_UDP_DST:
     case MFF_SCTP_DST:
@@ -2551,6 +2568,10 @@ mf_set(const struct mf_field *mf,
     case MFF_UDP_DST:
     case MFF_SCTP_DST:
         match_set_tp_dst_masked(match, value->be16, mask->be16);
+        break;
+
+    case MFF_VXLAN_VNI:
+        match_set_vxlan_vni_masked(match, value->be16, mask->be16);
         break;
 
     case MFF_TCP_FLAGS:

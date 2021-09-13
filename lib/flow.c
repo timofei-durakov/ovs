@@ -987,6 +987,10 @@ miniflow_extract(struct dp_packet *packet, struct miniflow *dst)
                 miniflow_push_be16(mf, tp_dst, udp->udp_dst);
                 miniflow_push_be16(mf, ct_tp_src, ct_tp_src);
                 miniflow_push_be16(mf, ct_tp_dst, ct_tp_dst);
+                if (udp->udp_dst == htons(4789)) {
+                    const struct vxlanhdr * vhrd = (struct vxlanhdr *) udp + 1;
+                    miniflow_push_be16(mf, vxlan_vni, vhrd->vx_vni.lo);
+                }
             }
         } else if (OVS_LIKELY(nw_proto == IPPROTO_SCTP)) {
             if (OVS_LIKELY(size >= SCTP_HEADER_LEN)) {
@@ -1908,7 +1912,7 @@ flow_wildcards_init_for_packet(struct flow_wildcards *wc,
          flow->nw_proto == IPPROTO_IGMP)) {
         WC_MASK_FIELD(wc, tp_src);
         WC_MASK_FIELD(wc, tp_dst);
-
+        WC_MASK_FIELD(wc, vxlan_vni);
         if (flow->nw_proto == IPPROTO_TCP) {
             WC_MASK_FIELD(wc, tcp_flags);
         } else if (flow->nw_proto == IPPROTO_IGMP) {
@@ -1974,6 +1978,7 @@ flow_wc_map(const struct flow *flow, struct flowmap *map)
         FLOWMAP_SET(map, ct_nw_dst);
         FLOWMAP_SET(map, ct_tp_src);
         FLOWMAP_SET(map, ct_tp_dst);
+        FLOWMAP_SET(map, vxlan_vni);
 
         if (OVS_UNLIKELY(flow->nw_proto == IPPROTO_IGMP)) {
             FLOWMAP_SET(map, igmp_group_ip4);
