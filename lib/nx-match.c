@@ -1169,7 +1169,7 @@ nx_put_raw(struct ofpbuf *b, enum ofp_version oxm, const struct match *match,
                 flow->tunnel.tun_id, match->wc.masks.tunnel.tun_id);
 
     /* VXLAN VNI. */
-    nxm_put_16m(&ctx, MFF_VXLAN_VNI, oxm, flow->vxlan_vni, match->wc.masks.vxlan_vni);
+    nxm_put_32m(&ctx, MFF_VXLAN_VNI, oxm, flow->vxlan_vni, match->wc.masks.vxlan_vni);
 
     /* Other tunnel metadata. */
     nxm_put_16m(&ctx, MFF_TUN_FLAGS, oxm,

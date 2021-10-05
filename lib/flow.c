@@ -989,7 +989,9 @@ miniflow_extract(struct dp_packet *packet, struct miniflow *dst)
                 miniflow_push_be16(mf, ct_tp_dst, ct_tp_dst);
                 if (udp->udp_dst == htons(4789)) {
                     const struct vxlanhdr * vhrd = (struct vxlanhdr *) udp + 1;
-                    miniflow_push_be16(mf, vxlan_vni, vhrd->vx_vni.lo);
+                    uint32_t vni = ntohl(get_16aligned_be32(&vhrd->vx_vni)) >> 8;
+                    ovs_be32 vni_be = htonl(vni);
+                    miniflow_push_be32(mf, vxlan_vni, vni_be);
                 }
             }
         } else if (OVS_LIKELY(nw_proto == IPPROTO_SCTP)) {

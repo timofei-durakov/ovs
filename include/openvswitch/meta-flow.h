@@ -1756,7 +1756,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      *
      * VXLAN VNI
      *
-     * Type: be16.
+     * Type: be32.
      * Maskable: bitwise.
      * Formatting: decimal.
      * Prerequisites: none.

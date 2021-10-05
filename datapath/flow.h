@@ -161,7 +161,7 @@ struct sw_flow_key {
 		u32 mark;
 		struct ovs_key_ct_labels labels;
 	} ct;
-	__be16 vxlan_vni;
+	__be32 vxlan_vni;
 
 } __aligned(BITS_PER_LONG/8); /* Ensure that we can do comparisons as longs. */
 

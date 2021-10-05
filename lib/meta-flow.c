@@ -929,7 +929,7 @@ mf_get_value(const struct mf_field *mf, const struct flow *flow,
         value->be16 = flow->tp_dst;
         break;
     case MFF_VXLAN_VNI:
-        value->be16 = flow->vxlan_vni;
+        value->be32 = flow->vxlan_vni;
         break;
 
     case MFF_TCP_FLAGS:
@@ -1271,7 +1271,7 @@ mf_set_value(const struct mf_field *mf,
         break;
 
     case MFF_VXLAN_VNI:
-        match_set_vxlan_vni(match, value->be16);
+        match_set_vxlan_vni(match, value->be32);
         break;
 
     case MFF_TCP_DST:
@@ -1561,7 +1561,7 @@ mf_set_flow_value(const struct mf_field *mf,
         flow->ct_tp_dst = value->be16;
         break;
     case MFF_VXLAN_VNI:
-        flow->vxlan_vni = value->be16;
+        flow->vxlan_vni = value->be32;
         break;
     CASE_MFF_REGS:
         flow->regs[mf->id - MFF_REG0] = ntohl(value->be32);
@@ -2239,8 +2239,8 @@ mf_set_wild(const struct mf_field *mf, struct match *match, char **err_str)
         break;
 
     case MFF_VXLAN_VNI:
-        match->wc.masks.vxlan_vni = htons(0);
-        match->flow.vxlan_vni = htons(0);
+        match->wc.masks.vxlan_vni = htonl(0);
+        match->flow.vxlan_vni = htonl(0);
         break;
 
     case MFF_TCP_DST:
@@ -2571,7 +2571,7 @@ mf_set(const struct mf_field *mf,
         break;
 
     case MFF_VXLAN_VNI:
-        match_set_vxlan_vni_masked(match, value->be16, mask->be16);
+        match_set_vxlan_vni_masked(match, value->be32, mask->be32);
         break;
 
     case MFF_TCP_FLAGS:

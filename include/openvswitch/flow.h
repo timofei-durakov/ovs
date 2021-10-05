@@ -159,9 +159,8 @@ struct flow {
                                  * Keep last for BUILD_ASSERT_DECL below. */
     ovs_be32 pad3;              /* Pad to 64 bits. */
 
-    ovs_be16 vxlan_vni;         /* VXLAN VNI id. */
-    ovs_be16 pad4;
-    ovs_be32 pad5;
+    ovs_be32 vxlan_vni;         /* VXLAN VNI id. */
+    ovs_be32 pad4;
 };
 BUILD_ASSERT_DECL(sizeof(struct flow) % sizeof(uint64_t) == 0);
 BUILD_ASSERT_DECL(sizeof(struct flow_tnl) % sizeof(uint64_t) == 0);

@@ -895,13 +895,13 @@ match_set_tp_src_masked(struct match *match, ovs_be16 port, ovs_be16 mask)
 }
 
 void
-match_set_vxlan_vni(struct match *match, ovs_be16 vxlan_vni)
+match_set_vxlan_vni(struct match *match, ovs_be32 vxlan_vni)
 {
-    match_set_vxlan_vni_masked(match, vxlan_vni, OVS_BE16_MAX);
+    match_set_vxlan_vni_masked(match, vxlan_vni, OVS_BE32_MAX);
 }
 
 void
-match_set_vxlan_vni_masked(struct match *match, ovs_be16 vxlan_vni, ovs_be16 mask)
+match_set_vxlan_vni_masked(struct match *match, ovs_be32 vxlan_vni, ovs_be32 mask)
 {
     match->flow.vxlan_vni = vxlan_vni & mask;
     match->wc.masks.vxlan_vni = mask;
@@ -1805,7 +1805,7 @@ match_format(const struct match *match,
                             TCP_FLAGS(OVS_BE16_MAX));
     }
     if (wc->masks.vxlan_vni) {
-        format_be16_masked(s, "vxlan_vni", f->vxlan_vni, wc->masks.vxlan_vni);
+        format_be32_masked(s, "vxlan_vni", f->vxlan_vni, wc->masks.vxlan_vni);
     }
     if (s->length > start_len) {
         ds_chomp(s, ',');

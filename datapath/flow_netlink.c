@@ -386,7 +386,7 @@ size_t ovs_key_attr_size(void)
 		+ nla_total_size(40)  /* OVS_KEY_ATTR_IPV6 */
 		+ nla_total_size(2)   /* OVS_KEY_ATTR_ICMPV6 */
 		+ nla_total_size(28)  /* OVS_KEY_ATTR_ND */
-		+ nla_total_size(2);  /* OVS_KEY_ATTR_VXLAN_VNI */
+		+ nla_total_size(4);  /* OVS_KEY_ATTR_VXLAN_VNI */
 }
 
 static const struct ovs_len_tbl ovs_vxlan_ext_key_lens[OVS_VXLAN_EXT_MAX + 1] = {
@@ -453,7 +453,7 @@ static const struct ovs_len_tbl ovs_key_lens[OVS_KEY_ATTR_MAX + 1] = {
 		.len = sizeof(struct ovs_key_ct_tuple_ipv6) },
 	[OVS_KEY_ATTR_NSH]       = { .len = OVS_ATTR_NESTED,
 				     .next = ovs_nsh_key_attr_lens, },
-    [OVS_KEY_ATTR_VXLAN_VNI] = { .len = sizeof(u16)},
+    [OVS_KEY_ATTR_VXLAN_VNI] = { .len = sizeof(u32)},
 };
 
 static bool check_attr_len(unsigned int attr_len, unsigned int expected_len)

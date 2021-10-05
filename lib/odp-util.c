@@ -4324,7 +4324,7 @@ format_odp_key_attr__(const struct nlattr *a, const struct nlattr *ma,
         break;
     }
     case OVS_KEY_ATTR_VXLAN_VNI:
-        ds_put_format(ds, "%d", ntohs(nl_attr_get_be16(a)));
+        ds_put_format(ds, "%d", ntohl(nl_attr_get_be32(a)));
         break;
 
     case OVS_KEY_ATTR_TCP_FLAGS:
