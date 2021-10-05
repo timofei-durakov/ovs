@@ -47,6 +47,7 @@
 #include <net/mpls.h>
 #include <net/ndisc.h>
 #include <net/nsh.h>
+#include <net/vxlan.h>
 
 #include "datapath.h"
 #include "conntrack.h"
@@ -606,6 +607,11 @@ static int key_extract_l3l4(struct sk_buff *skb, struct sw_flow_key *key)
 				struct udphdr *udp = udp_hdr(skb);
 				key->tp.src = udp->source;
 				key->tp.dst = udp->dest;
+				if (udp->dest == 4789) {
+                    const struct vxlanhdr * vhrd = (struct vxlanhdr *) udp + 1;
+                    key->vxlan_vni = (__be32) vhrd->vx_vni;
+				}
+
 			} else {
 				memset(&key->tp, 0, sizeof(key->tp));
 			}
@@ -732,6 +738,10 @@ static int key_extract_l3l4(struct sk_buff *skb, struct sw_flow_key *key)
 				struct udphdr *udp = udp_hdr(skb);
 				key->tp.src = udp->source;
 				key->tp.dst = udp->dest;
+                if (udp->dest == 4789) {
+                    const struct vxlanhdr * vhrd = (struct vxlanhdr *) udp + 1;
+                    key->vxlan_vni = (__be32) vhrd->vx_vni;
+                }
 			} else {
 				memset(&key->tp, 0, sizeof(key->tp));
 			}

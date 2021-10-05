@@ -392,6 +392,7 @@ enum ovs_key_attr {
 	OVS_KEY_ATTR_ND_EXTENSIONS, /* struct ovs_key_nd_extensions */
 #endif
 
+    OVS_KEY_ATTR_VXLAN_VNI, /* be32 VXLAN vni. */
 	__OVS_KEY_ATTR_MAX
 };
 
@@ -1027,9 +1028,9 @@ enum ovs_action_attr {
 	OVS_ACTION_ATTR_SET,          /* One nested OVS_KEY_ATTR_*. */
 	OVS_ACTION_ATTR_PUSH_VLAN,    /* struct ovs_action_push_vlan. */
 	OVS_ACTION_ATTR_POP_VLAN,     /* No argument. */
-    OVS_ACTION_ATTR_PUSH_VXLAN,   /* struct ovs_action_push_vxlan. */
-    OVS_ACTION_ATTR_POP_VXLAN,    /* No argument. */
-    OVS_ACTION_ATTR_SAMPLE,       /* Nested OVS_SAMPLE_ATTR_*. */
+	OVS_ACTION_ATTR_PUSH_VXLAN,   /* struct ovs_action_push_vxlan. */
+	OVS_ACTION_ATTR_POP_VXLAN,    /* No argument. */
+	OVS_ACTION_ATTR_SAMPLE,       /* Nested OVS_SAMPLE_ATTR_*. */
 	OVS_ACTION_ATTR_RECIRC,       /* u32 recirc_id. */
 	OVS_ACTION_ATTR_HASH,	      /* struct ovs_action_hash. */
 	OVS_ACTION_ATTR_PUSH_MPLS,    /* struct ovs_action_push_mpls. */

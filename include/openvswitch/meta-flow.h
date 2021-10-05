@@ -240,6 +240,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_DP_HASH(35) since v2.2.
      * OXM: NXOXM_ET_DP_HASH(0) since v2.4.
+     * OPK: none.
      */
     MFF_DP_HASH,
 
@@ -255,6 +256,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_RECIRC_ID(36) since v2.2.
      * OXM: none.
+     * OPK: none.
      */
     MFF_RECIRC_ID,
 
@@ -269,6 +271,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: OXM_OF_PACKET_TYPE(44) since OF1.5 and v2.8.
+     * OPK: none.
      */
     MFF_PACKET_TYPE,
 
@@ -283,7 +286,8 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Prerequisites: none.
      * Access: read-only.
      * NXM: NXM_NX_CONJ_ID(37) since v2.4.
-     * OXM: none. */
+     * OXM: none.
+     * OPK: none. */
     MFF_CONJ_ID,
 
     /* "tun_id" (aka "tunnel_id").
@@ -300,6 +304,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_ID(16) since v1.1.
      * OXM: OXM_OF_TUNNEL_ID(38) since OF1.3 and v1.10.
+     * OPK: none.
      * Prefix lookup member: tunnel.tun_id.
      */
     MFF_TUN_ID,
@@ -317,6 +322,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_IPV4_SRC(31) since v2.0.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: tunnel.ip_src.
      */
     MFF_TUN_SRC,
@@ -335,6 +341,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_IPV4_DST(32) since v2.0.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: tunnel.ip_dst.
      */
     MFF_TUN_DST,
@@ -352,6 +359,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_IPV6_SRC(109) since v2.5.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: tunnel.ipv6_src.
      */
     MFF_TUN_IPV6_SRC,
@@ -370,6 +378,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_IPV6_DST(110) since v2.5.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: tunnel.ipv6_dst.
      */
     MFF_TUN_IPV6_DST,
@@ -387,6 +396,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_FLAGS(104) since v2.5.
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_FLAGS,
 
@@ -404,6 +414,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_TTL,
 
@@ -419,6 +430,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_TOS,
 
@@ -433,6 +445,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_GBP_ID(38) since v2.4.
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_GBP_ID,
 
@@ -447,6 +460,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_TUN_GBP_FLAGS(39) since v2.4.
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_GBP_FLAGS,
 
@@ -461,6 +475,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_ET_ERSPAN_IDX(11) since v2.10.
+     * OPK: none.
      */
     MFF_TUN_ERSPAN_IDX,
 
@@ -475,6 +490,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_ET_ERSPAN_VER(12) since v2.10.
+     * OPK: none.
      */
     MFF_TUN_ERSPAN_VER,
 
@@ -489,6 +505,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_ET_ERSPAN_DIR(13) since v2.10.
+     * OPK: none.
      */
     MFF_TUN_ERSPAN_DIR,
 
@@ -503,6 +520,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_ET_ERSPAN_HWID(14) since v2.10.
+     * OPK: none.
      */
     MFF_TUN_ERSPAN_HWID,
 
@@ -517,6 +535,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: NXOXM_ET_GTPU_FLAGS(15) since v2.13.
+     * OPK: none.
      */
     MFF_TUN_GTPU_FLAGS,
 
@@ -531,6 +550,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: NXOXM_ET_GTPU_MSGTYPE(16) since v2.13.
+     * OPK: none.
      */
     MFF_TUN_GTPU_MSGTYPE,
 
@@ -613,6 +633,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * NXM: NXM_NX_TUN_METADATA62(102) since v2.5.      <62>
      * NXM: NXM_NX_TUN_METADATA63(103) since v2.5.      <63>
      * OXM: none.
+     * OPK: none.
      */
     MFF_TUN_METADATA0,
     MFF_TUN_METADATA1,
@@ -694,6 +715,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_METADATA(2) since OF1.2 and v1.8.
+     * OPK: none.
      * OF1.1: bitwise mask.
      */
     MFF_METADATA,
@@ -710,6 +732,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_IN_PORT(0) since v1.1.
      * OXM: none.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -727,6 +750,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_IN_PORT(0) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_IN_PORT_OXM,
@@ -741,6 +765,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * NXM: none.
      * OXM: ONFOXM_ET_ACTSET_OUTPUT(43) since OF1.3 and v2.4,
      *      OXM_OF_ACTSET_OUTPUT(43) since OF1.5 and v2.4.
+     * OPK: none.
      */
     MFF_ACTSET_OUTPUT,
 
@@ -761,6 +786,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: none.
+     * OPK: none.
      */
     MFF_SKB_PRIORITY,
 
@@ -778,6 +804,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_PKT_MARK(33) since v2.0.
      * OXM: none.
+     * OPK: none.
      */
     MFF_PKT_MARK,
 
@@ -793,6 +820,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_STATE(105) since v2.5.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_STATE,
 
@@ -808,6 +836,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_ZONE(106) since v2.5.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_ZONE,
 
@@ -827,6 +856,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_CT_MARK(107) since v2.5.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_MARK,
 
@@ -846,6 +876,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_CT_LABEL(108) since v2.5.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_LABEL,
 
@@ -867,6 +898,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_NW_PROTO(119) since v2.8.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_NW_PROTO,
 
@@ -885,6 +917,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_NW_SRC(120) since v2.8.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: ct_nw_src.
      */
     MFF_CT_NW_SRC,
@@ -904,6 +937,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_NW_DST(121) since v2.8.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: ct_nw_dst.
      */
     MFF_CT_NW_DST,
@@ -923,6 +957,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_IPV6_SRC(122) since v2.8.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: ct_ipv6_src.
      */
     MFF_CT_IPV6_SRC,
@@ -942,6 +977,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_IPV6_DST(123) since v2.8.
      * OXM: none.
+     * OPK: none.
      * Prefix lookup member: ct_ipv6_dst.
      */
     MFF_CT_IPV6_DST,
@@ -961,6 +997,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_TP_SRC(124) since v2.8.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_TP_SRC,
 
@@ -979,6 +1016,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_CT_TP_DST(125) since v2.8.
      * OXM: none.
+     * OPK: none.
      */
     MFF_CT_TP_DST,
 
@@ -1009,6 +1047,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * NXM: NXM_NX_REG14(14) since v2.6.      <14>
      * NXM: NXM_NX_REG15(15) since v2.6.      <15>
      * OXM: none.
+     * OPK: none.
      */
     MFF_REG0,
     MFF_REG1,
@@ -1042,6 +1081,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_PKT_REG<N>(<N>) since OF1.3 and v2.4.
+     * OPK: none.
      */
     MFF_XREG0,
     MFF_XREG1,
@@ -1074,6 +1114,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * NXM: NXM_NX_XXREG6(117) since vX.Y.              <6>
      * NXM: NXM_NX_XXREG7(118) since vX.Y.              <7>
      * OXM: none.
+     * OPK: none.
      */
     MFF_XXREG0,
     MFF_XXREG1,
@@ -1098,6 +1139,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ETH_SRC(2) since v1.1.
      * OXM: OXM_OF_ETH_SRC(4) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: bitwise mask.
      */
@@ -1114,6 +1156,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ETH_DST(1) since v1.1.
      * OXM: OXM_OF_ETH_DST(3) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: bitwise mask.
      */
@@ -1133,6 +1176,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_OF_ETH_TYPE(3) since v1.1.
      * OXM: OXM_OF_ETH_TYPE(5) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1163,6 +1207,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_VLAN_TCI(4) since v1.1.
      * OXM: none.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1179,6 +1224,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: none.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1197,6 +1243,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_VLAN_VID(6) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1213,6 +1260,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: none.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1229,6 +1277,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_VLAN_PCP(7) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1249,6 +1298,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_MPLS_LABEL(34) since OF1.2 and v1.11.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_MPLS_LABEL,
@@ -1265,6 +1315,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_MPLS_TC(35) since OF1.2 and v1.11.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_MPLS_TC,
@@ -1281,6 +1332,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: OXM_OF_MPLS_BOS(36) since OF1.3 and v1.11.
+     * OPK: none.
      */
     MFF_MPLS_BOS,
 
@@ -1296,6 +1348,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_MPLS_TTL(30) since v2.6.
      * OXM: none.
+     * OPK: none.
      */
     MFF_MPLS_TTL,
 
@@ -1319,6 +1372,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_IP_SRC(7) since v1.1.
      * OXM: OXM_OF_IPV4_SRC(11) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: CIDR mask.
      * OF1.1: bitwise mask.
      * Prefix lookup member: nw_src.
@@ -1338,6 +1392,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_IP_DST(8) since v1.1.
      * OXM: OXM_OF_IPV4_DST(12) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: CIDR mask.
      * OF1.1: bitwise mask.
      * Prefix lookup member: nw_dst.
@@ -1359,6 +1414,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_IPV6_SRC(19) since v1.1.
      * OXM: OXM_OF_IPV6_SRC(26) since OF1.2 and v1.1.
+     * OPK: none.
      * Prefix lookup member: ipv6_src.
      */
     MFF_IPV6_SRC,
@@ -1374,6 +1430,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_IPV6_DST(20) since v1.1.
      * OXM: OXM_OF_IPV6_DST(27) since OF1.2 and v1.1.
+     * OPK: none.
      * Prefix lookup member: ipv6_dst.
      */
     MFF_IPV6_DST,
@@ -1389,6 +1446,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_IPV6_LABEL(27) since v1.4.
      * OXM: OXM_OF_IPV6_FLABEL(28) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_IPV6_LABEL,
 
@@ -1407,6 +1465,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_OF_IP_PROTO(6) since v1.1.
      * OXM: OXM_OF_IP_PROTO(10) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1429,6 +1488,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_IP_TOS(5) since v1.1.
      * OXM: none.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1447,6 +1507,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_IP_DSCP(8) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1463,6 +1524,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_IP_ECN(28) since v1.4.
      * OXM: OXM_OF_IP_ECN(9) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_IP_ECN,
@@ -1479,6 +1541,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_IP_TTL(29) since v1.4.
      * OXM: none.
+     * OPK: none.
      */
     MFF_IP_TTL,
 
@@ -1493,6 +1556,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: NXM_NX_IP_FRAG(26) since v1.3.
      * OXM: none.
+     * OPK: none.
      */
     MFF_IP_FRAG,
 
@@ -1515,6 +1579,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ARP_OP(15) since v1.1.
      * OXM: OXM_OF_ARP_OP(21) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1534,6 +1599,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ARP_SPA(16) since v1.1.
      * OXM: OXM_OF_ARP_SPA(22) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: CIDR mask.
      * OF1.1: bitwise mask.
      */
@@ -1553,6 +1619,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ARP_TPA(17) since v1.1.
      * OXM: OXM_OF_ARP_TPA(23) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: CIDR mask.
      * OF1.1: bitwise mask.
      */
@@ -1570,6 +1637,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ARP_SHA(17) since v1.1.
      * OXM: OXM_OF_ARP_SHA(24) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ARP_SHA,
 
@@ -1585,6 +1653,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ARP_THA(18) since v1.1.
      * OXM: OXM_OF_ARP_THA(25) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ARP_THA,
 
@@ -1603,6 +1672,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_TCP_SRC(9) since v1.1.
      * OXM: OXM_OF_TCP_SRC(13) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1619,6 +1689,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_TCP_DST(10) since v1.1.
      * OXM: OXM_OF_TCP_DST(14) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1639,6 +1710,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * NXM: NXM_NX_TCP_FLAGS(34) since v2.1.
      * OXM: ONFOXM_ET_TCP_FLAGS(42) since OF1.3 and v2.4,
      *      OXM_OF_TCP_FLAGS(42) since OF1.5 and v2.3.
+     * OPK: none.
      */
     MFF_TCP_FLAGS,
 
@@ -1657,6 +1729,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_UDP_SRC(11) since v1.1.
      * OXM: OXM_OF_UDP_SRC(15) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1673,10 +1746,26 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_UDP_DST(12) since v1.1.
      * OXM: OXM_OF_UDP_DST(16) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
     MFF_UDP_DST,
+
+    /* "vxlan_vni".
+     *
+     * VXLAN VNI
+     *
+     * Type: be32.
+     * Maskable: bitwise.
+     * Formatting: decimal.
+     * Prerequisites: none.
+     * Access: read/write.
+     * OXM: none.
+     * NXM: none.
+     * OPK: OPK_OF_VXLAN_VNI(12) since v1.3.
+     */
+    MFF_VXLAN_VNI,
 
 /* ## ---- ## */
 /* ## SCTP ## */
@@ -1693,6 +1782,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_SCTP_SRC(17) since OF1.2 and v2.0.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_SCTP_SRC,
@@ -1708,6 +1798,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: OXM_OF_SCTP_DST(18) since OF1.2 and v2.0.
+     * OPK: none.
      * OF1.1: exact match.
      */
     MFF_SCTP_DST,
@@ -1727,6 +1818,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ICMP_TYPE(13) since v1.1.
      * OXM: OXM_OF_ICMPV4_TYPE(19) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1743,6 +1835,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_OF_ICMP_CODE(14) since v1.1.
      * OXM: OXM_OF_ICMPV4_CODE(20) since OF1.2 and v1.7.
+     * OPK: none.
      * OF1.0: exact match.
      * OF1.1: exact match.
      */
@@ -1759,6 +1852,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ICMPV6_TYPE(21) since v1.1.
      * OXM: OXM_OF_ICMPV6_TYPE(29) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ICMPV6_TYPE,
 
@@ -1773,6 +1867,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ICMPV6_CODE(22) since v1.1.
      * OXM: OXM_OF_ICMPV6_CODE(30) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ICMPV6_CODE,
 
@@ -1793,6 +1888,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ND_TARGET(23) since v1.1.
      * OXM: OXM_OF_IPV6_ND_TARGET(31) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ND_TARGET,
 
@@ -1807,6 +1903,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ND_SLL(24) since v1.1.
      * OXM: OXM_OF_IPV6_ND_SLL(32) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ND_SLL,
 
@@ -1821,6 +1918,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: NXM_NX_ND_TLL(25) since v1.1.
      * OXM: OXM_OF_IPV6_ND_TLL(33) since OF1.2 and v1.7.
+     * OPK: none.
      */
     MFF_ND_TLL,
 
@@ -1835,6 +1933,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: ERICOXM_OF_ICMPV6_ND_RESERVED(1) since v2.11.
+     * OPK: none.
      */
     MFF_ND_RESERVED,
 
@@ -1849,6 +1948,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: ERICOXM_OF_ICMPV6_ND_OPTIONS_TYPE(2) since v2.11.
+     * OPK: none.
      */
     MFF_ND_OPTIONS_TYPE,
 
@@ -1867,6 +1967,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_NSH_FLAGS(1) since v2.8.
+     * OPK: none.
      */
     MFF_NSH_FLAGS,
 
@@ -1881,6 +1982,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: NXOXM_NSH_MDTYPE(2) since v2.8.
+     * OPK: none.
      */
     MFF_NSH_MDTYPE,
 
@@ -1895,6 +1997,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read-only.
      * NXM: none.
      * OXM: NXOXM_NSH_NP(3) since v2.8.
+     * OPK: none.
      */
     MFF_NSH_NP,
 
@@ -1909,6 +2012,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_NSH_SPI(4) since v2.8.
+     * OPK: none.
      */
     MFF_NSH_SPI,
 
@@ -1923,6 +2027,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_NSH_SI(5) since v2.8.
+     * OPK: none.
      */
     MFF_NSH_SI,
 
@@ -1940,6 +2045,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * OXM: NXOXM_NSH_C2(7) since v2.8.        <2>
      * OXM: NXOXM_NSH_C3(8) since v2.8.        <3>
      * OXM: NXOXM_NSH_C4(9) since v2.8.        <4>
+     * OPK: none.
      */
     MFF_NSH_C1,
     MFF_NSH_C2,
@@ -1957,6 +2063,7 @@ enum OVS_PACKED_ENUM mf_field_id {
      * Access: read/write.
      * NXM: none.
      * OXM: NXOXM_NSH_TTL(10) since v2.9.
+     * OPK: none.
      */
     MFF_NSH_TTL,
 

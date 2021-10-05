@@ -269,10 +269,10 @@ enum ofp_raw_action_type {
     /* OPK1.3-1.4(3201): struct opk_action_swap_field, ... VLMFF */
     OPK_RAW13_SWAP_FIELD,
 
-    /* ONF1.3-1.4(3202): struct opk_action_push_vxlan */
+    /* OPK1.3-1.4(3202): struct opk_action_push_vxlan */
     OPK_RAW13_PUSH_VXLAN,
 
-    /* ONF1.3-1.4(3203): struct opk_action_pop_vxlan */
+    /* OPK1.3-1.4(3203): struct opk_action_pop_vxlan */
     OPK_RAW13_POP_VXLAN,
 
 /* ## ------------------------- ## */
@@ -2497,25 +2497,26 @@ struct opk_action_swap_field {
 };
 
 /* Action structure for OpenFlow 1.3 extension push vxlan. */
-struct opk_action_push_vxlan {
+struct  opk_action_push_vxlan {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
     ovs_be16 len;               /* Length is padded to 64 bits. */
-    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
     ovs_be16 exp_type;          /* 3202. */
+    uint8_t pad[2];             /* Not used. */
     struct eth_addr eth_src;
     struct eth_addr eth_dst;
     ovs_be32 src_ipv4;
     ovs_be32 dst_ipv4;
     ovs_be32 vni;
     ovs_be16 udp_src;
-    uint8_t pad[8];            /* Not used. */
+    uint8_t pad2[2];            /* Not used. */
 };
 
 /* Action structure for OpenFlow 1.3 extension pop vxlan. */
 struct opk_action_pop_vxlan {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
     ovs_be16 len;               /* Length is padded to 64 bits. */
-    ovs_be32 experimenter;      /* ONF_VENDOR_ID. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
     ovs_be16 exp_type;          /* 3203. */
     uint8_t pad[6];             /* Not used. */
 };
