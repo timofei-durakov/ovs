@@ -1065,6 +1065,7 @@ sflow_read_set_action(const struct nlattr *attr,
     case OVS_KEY_ATTR_UNSPEC:
     case OVS_KEY_ATTR_PACKET_TYPE:
     case OVS_KEY_ATTR_NSH:
+    case OVS_KEY_ATTR_VXLAN_VNI:
     case __OVS_KEY_ATTR_MAX:
     default:
         break;
@@ -1193,6 +1194,17 @@ dpif_sflow_read_actions(const struct flow *flow,
             /* TODO: 802.1AD(QinQ) is not supported by OVS (yet), so do not
              * construct a VLAN-stack. The sFlow user-action cookie already
              * captures the egress VLAN ID so there is nothing more to do here.
+             */
+            break;
+        case OVS_ACTION_ATTR_PUSH_VXLAN:
+            /*
+             * TODO: handle push_vxlan action for sflow.
+             */
+            break;
+
+        case OVS_ACTION_ATTR_POP_VXLAN:
+            /*
+             * TODO: handle push_vxlan action for sflow.
              */
             break;
 

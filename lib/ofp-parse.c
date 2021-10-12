@@ -352,3 +352,20 @@ ofputil_parse_key_value(char **stringp, char **keyp, char **valuep)
     *valuep = value;
     return true;
 }
+
+bool ofputil_parse_key_value_vxlan(char **stringp, char **setter) {
+    *stringp += strspn(*stringp, ", \t\r\n");
+    if (**stringp == '\0') {
+        *setter = NULL;
+        return false;
+    }
+
+
+    char *key = *stringp;
+    size_t key_len = strcspn(key, ";");
+    char key_delim = key[key_len];
+    key[key_len] = '\0';
+    *stringp += key_len + (key_delim != '\0');
+    *setter = key;
+    return true;
+}

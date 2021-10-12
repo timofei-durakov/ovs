@@ -78,7 +78,8 @@ OXM_CLASSES = {"NXM_OF_":        (0,          0x0000, 'extension'),
                # if OVS didn't have those grandfathered in.  It is currently
                # used only to test support for experimenter OXM, since there
                # are barely any real uses of experimenter OXM in the wild.
-               "NXOXM_ET_":      (0x00002320, 0xffff, 'extension')}
+               "NXOXM_ET_":      (0x00002320, 0xffff, 'extension'),
+               "OPK_OF_":        (0x0000aa02, 0xffff, 'extension')}
 
 def oxm_name_to_class(name):
     prefix = ''
@@ -227,7 +228,7 @@ def parse_field(mff, comment):
     d = {}
     for key in ("Type", "Maskable", "Formatting", "Prerequisites",
                 "Access", "Prefix lookup member",
-                "OXM", "NXM", "OF1.0", "OF1.1"):
+                "OXM", "NXM", "OPK", "OF1.0", "OF1.1"):
         d[key] = None
     for fline in comment[blank + 1:]:
         m = re.match(r'([^:]+):\s+(.*)\.$', fline)
@@ -298,9 +299,9 @@ def parse_field(mff, comment):
     f['OF1.1'] = d['OF1.1']
     if not d['OF1.1'] in (None, 'exact match', 'bitwise mask'):
         fatal("%s: unknown OF1.1 match type %s" % (mff, d['OF1.1']))
-
     f['OXM'] = (parse_oxms(d['OXM'], 'OXM', f['n_bytes']) +
-                parse_oxms(d['NXM'], 'NXM', f['n_bytes']))
+                parse_oxms(d['NXM'], 'NXM', f['n_bytes']) +
+                parse_oxms(d['OPK'], 'OPK', f['n_bytes']))
 
     f['prefix'] = d["Prefix lookup member"]
 

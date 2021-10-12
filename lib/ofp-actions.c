@@ -38,6 +38,7 @@
 #include "openvswitch/ofp-prop.h"
 #include "openvswitch/ofp-table.h"
 #include "openvswitch/ofpbuf.h"
+#include "openvswitch/types.h"
 #include "openvswitch/vlog.h"
 #include "unaligned.h"
 #include "util.h"
@@ -268,6 +269,12 @@ enum ofp_raw_action_type {
     /* OPK1.3-1.4(3201): struct opk_action_swap_field, ... VLMFF */
     OPK_RAW13_SWAP_FIELD,
 
+    /* OPK1.3-1.4(3202): struct opk_action_push_vxlan */
+    OPK_RAW13_PUSH_VXLAN,
+
+    /* OPK1.3-1.4(3203): struct opk_action_pop_vxlan */
+    OPK_RAW13_POP_VXLAN,
+
 /* ## ------------------------- ## */
 /* ## Nicira extension actions. ## */
 /* ## ------------------------- ## */
@@ -477,6 +484,8 @@ ofpact_next_flattened(const struct ofpact *ofpact)
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
     case OFPACT_SWAP_FIELD:
+    case OFPACT_PUSH_VXLAN:
+    case OFPACT_POP_VXLAN:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
     case OFPACT_DEC_TTL:
@@ -2466,6 +2475,8 @@ struct onf_action_copy_field {
     uint8_t pad3[4];            /* Not used. */
 };
 
+OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
+
 /* Action structure for OpenFlow 1.3 extension copy-field action.. */
 struct opk_action_swap_field {
     ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
@@ -2485,7 +2496,30 @@ struct opk_action_swap_field {
     uint8_t pad3[4];            /* Not used. */
 };
 
-OFP_ASSERT(sizeof(struct onf_action_copy_field) == 24);
+/* Action structure for OpenFlow 1.3 extension push vxlan. */
+struct  opk_action_push_vxlan {
+    ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
+    ovs_be16 len;               /* Length is padded to 64 bits. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
+    ovs_be16 exp_type;          /* 3202. */
+    uint8_t pad[2];             /* Not used. */
+    struct eth_addr eth_src;
+    struct eth_addr eth_dst;
+    ovs_be32 src_ipv4;
+    ovs_be32 dst_ipv4;
+    ovs_be32 vni;
+    ovs_be16 udp_src;
+    uint8_t pad2[2];            /* Not used. */
+};
+
+/* Action structure for OpenFlow 1.3 extension pop vxlan. */
+struct opk_action_pop_vxlan {
+    ovs_be16 type;              /* OFPAT_EXPERIMENTER. */
+    ovs_be16 len;               /* Length is padded to 64 bits. */
+    ovs_be32 experimenter;      /* OPK_VENDOR_ID. */
+    ovs_be16 exp_type;          /* 3203. */
+    uint8_t pad[6];             /* Not used. */
+};
 
 /* Action structure for NXAST_REG_MOVE.
  *
@@ -2694,6 +2728,29 @@ decode_OPK_RAW13_SWAP_FIELD(const struct opk_action_swap_field *oasf,
                                tlv_bitmap, ofpacts);
 }
 
+
+static enum ofperr
+decode_OPK_RAW13_PUSH_VXLAN(const struct opk_action_push_vxlan *oapuvx, enum ofp_version ofp_version OVS_UNUSED,
+        struct ofpbuf *ofpacts)
+{
+    struct ofpact_push_vxlan *push = ofpact_put_PUSH_VXLAN(ofpacts);
+    push->eth_src = oapuvx->eth_src;
+    push->eth_dst = oapuvx->eth_dst;
+    push->src_ipv4 = oapuvx->src_ipv4;
+    push->dst_ipv4 = oapuvx->dst_ipv4;
+    push->udp_src = oapuvx->udp_src;
+    push->vni = oapuvx->vni;
+    return 0;
+}
+
+static enum ofperr
+decode_OPK_RAW13_POP_VXLAN(const struct opk_action_pop_vxlan *oapovx OVS_UNUSED, enum ofp_version  ofp_version OVS_UNUSED,
+        struct ofpbuf *ofpacts)
+{
+    ofpact_put_POP_VXLAN(ofpacts);
+    return 0;
+}
+
 static enum ofperr
 decode_ONFACT_RAW13_COPY_FIELD(const struct onf_action_copy_field *oacf,
                                enum ofp_version ofp_version OVS_UNUSED,
@@ -2799,6 +2856,33 @@ encode_SWAP_FIELD(const struct ofpact_swap_field *swap,
     pad_ofpat(out, start_ofs);
 }
 
+static void
+encode_PUSH_VXLAN(const struct ofpact_push_vxlan *push,
+                  enum ofp_version ofp_version OVS_UNUSED, struct ofpbuf *out)
+{
+    size_t start_ofs = out->size;
+
+    struct opk_action_push_vxlan *encoded = put_OPK13_PUSH_VXLAN(out);
+    encoded->eth_src = push->eth_src;
+    encoded->eth_dst = push->eth_dst;
+    encoded->src_ipv4 = push->src_ipv4;
+    encoded->dst_ipv4 = push->dst_ipv4;
+    encoded->udp_src = push->udp_src;
+    encoded->vni = push->vni;
+
+    pad_ofpat(out, start_ofs);
+}
+
+static void
+encode_POP_VXLAN(const struct ofpact_null *pop OVS_UNUSED,
+                  enum ofp_version ofp_version OVS_UNUSED, struct ofpbuf *out)
+{
+    size_t start_ofs = out->size;
+
+    put_OPK13_POP_VXLAN(out);
+    pad_ofpat(out, start_ofs);
+}
+
 
 static char * OVS_WARN_UNUSED_RESULT
 parse_REG_MOVE(const char *arg, const struct ofpact_parse_params *pp)
@@ -2828,6 +2912,80 @@ parse_SWAP_FIELD(const char *arg, const struct ofpact_parse_params *pp)
     return nxm_parse_swap_field(swap, arg);
 }
 
+/* Parses the input argument 'arg' into the key, value, and delimiter
+ * components that are common across the reg_load and set_field action format.
+ *
+ * With an argument like "1->metadata", sets the following pointers to
+ * point within 'arg':
+ * key: "metadata"
+ * value: "1"
+ * delim: "->"
+ *
+ * Returns NULL if successful, otherwise a malloc()'d string describing the
+ * error.  The caller is responsible for freeing the returned string. */
+static char * OVS_WARN_UNUSED_RESULT
+set_field_split_str(char *arg, char **key, char **value, char **delim)
+{
+    char *value_end;
+
+    *value = arg;
+    value_end = strstr(arg, "->");
+    *key = value_end + strlen("->");
+    if (delim) {
+        *delim = value_end;
+    }
+
+    if (!value_end) {
+        return xasprintf("%s: missing `->'", arg);
+    }
+    if (strlen(value_end) <= strlen("->")) {
+        return xasprintf("%s: missing field name following `->'", arg);
+    }
+
+    return NULL;
+}
+
+static char * OVS_WARN_UNUSED_RESULT
+parse_PUSH_VXLAN(char *arg OVS_UNUSED, const struct ofpact_parse_params *pp OVS_UNUSED)
+{
+
+
+    struct ofpact_push_vxlan *pVxlan = ofpact_put_PUSH_VXLAN(pp->ofpacts);
+    char *tuple;
+    char *pos = arg;
+    while (ofputil_parse_key_value_vxlan(&pos, &tuple)) {
+        char *value_end;
+        char *value = tuple;
+        value_end = strstr(tuple, "->");
+        char *key = value_end + strlen("->");
+        size_t value_len = strcspn(value, "->");
+        value[value_len] = '\0';
+
+        if (strcmp("vni", key) == 0) {
+            pVxlan->vni = htonl(atoi(value));
+        } else if (strcmp("eth_src", key) == 0) {
+            OVS_UNUSED char *string = str_to_mac(value, &pVxlan->eth_src);
+
+        } else if (strcmp("eth_dst", key) == 0) {
+            OVS_UNUSED char *string = str_to_mac(value, &pVxlan->eth_dst);
+        } else if (strcmp("ip_src", key) == 0) {
+            OVS_UNUSED char *string = str_to_ip(value, &pVxlan->src_ipv4);
+        } else if (strcmp("ip_dst", key) == 0) {
+            OVS_UNUSED char *string = str_to_ip(value, &pVxlan->dst_ipv4);
+        } else if (strcmp("udp_src", key) == 0) {
+            pVxlan->udp_src = htons(atoi(value));
+        }
+    }
+    return NULL;
+}
+
+static char * OVS_WARN_UNUSED_RESULT
+parse_POP_VXLAN(const char *arg OVS_UNUSED, const struct ofpact_parse_params *pp OVS_UNUSED)
+{
+    ofpact_put_POP_VXLAN(pp->ofpacts);
+    return NULL;
+}
+
 
 static void
 format_SWAP_FIELD(const struct ofpact_swap_field *a,
@@ -2836,12 +2994,40 @@ format_SWAP_FIELD(const struct ofpact_swap_field *a,
     nxm_format_swap_field(a, fp->s);
 }
 
+static void
+format_PUSH_VXLAN(const struct ofpact_push_vxlan *a OVS_UNUSED,
+                  const struct ofpact_format_params *fp OVS_UNUSED)
+{
+    ds_put_format(fp->s, "%spush_vxlan:%s%d",
+                  colors.param, colors.end, ntohl(a->vni));
+}
+
+
+static void
+format_POP_VXLAN(const struct ofpact_null *a OVS_UNUSED,
+                 const struct ofpact_format_params *fp OVS_UNUSED)
+{
+    ds_put_format(fp->s, "%spop_vxlan%s",
+                  colors.param, colors.end);
+}
+
 static enum ofperr
 check_SWAP_FIELD(const struct ofpact_swap_field *a,
                const struct ofpact_check_params *cp)
 {
     return nxm_swap_field_check(a, cp->match);
 }
+
+static enum ofperr check_PUSH_VXLAN(const struct ofpact_push_vxlan *a OVS_UNUSED,
+                                    const struct ofpact_check_params *cp OVS_UNUSED) {
+    return 0;
+}
+
+static enum ofperr check_POP_VXLAN(const struct ofpact_null *a OVS_UNUSED,
+                                    const struct ofpact_check_params *cp OVS_UNUSED) {
+    return 0;
+}
+
 
 /* Action structure for OFPAT12_SET_FIELD. */
 struct ofp12_action_set_field {
@@ -3299,38 +3485,7 @@ encode_SET_FIELD(const struct ofpact_set_field *sf,
     }
 }
 
-/* Parses the input argument 'arg' into the key, value, and delimiter
- * components that are common across the reg_load and set_field action format.
- *
- * With an argument like "1->metadata", sets the following pointers to
- * point within 'arg':
- * key: "metadata"
- * value: "1"
- * delim: "->"
- *
- * Returns NULL if successful, otherwise a malloc()'d string describing the
- * error.  The caller is responsible for freeing the returned string. */
-static char * OVS_WARN_UNUSED_RESULT
-set_field_split_str(char *arg, char **key, char **value, char **delim)
-{
-    char *value_end;
 
-    *value = arg;
-    value_end = strstr(arg, "->");
-    *key = value_end + strlen("->");
-    if (delim) {
-        *delim = value_end;
-    }
-
-    if (!value_end) {
-        return xasprintf("%s: missing `->'", arg);
-    }
-    if (strlen(value_end) <= strlen("->")) {
-        return xasprintf("%s: missing field name following `->'", arg);
-    }
-
-    return NULL;
-}
 
 /* Parses a "set_field" action with argument 'arg', appending the parsed
  * action to 'pp->ofpacts'.
@@ -8056,6 +8211,8 @@ action_set_classify(const struct ofpact *a)
     case OFPACT_SET_FIELD:
     case OFPACT_REG_MOVE:
     case OFPACT_SWAP_FIELD:
+    case OFPACT_PUSH_VXLAN:
+    case OFPACT_POP_VXLAN:
     case OFPACT_SET_ETH_DST:
     case OFPACT_SET_ETH_SRC:
     case OFPACT_SET_IP_DSCP:
@@ -8274,6 +8431,8 @@ ovs_instruction_type_from_ofpact_type(enum ofpact_type type,
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
     case OFPACT_SWAP_FIELD:
+    case OFPACT_PUSH_VXLAN:
+    case OFPACT_POP_VXLAN:
     case OFPACT_SET_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
@@ -9184,6 +9343,8 @@ ofpact_outputs_to_port(const struct ofpact *ofpact, ofp_port_t port)
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
     case OFPACT_SWAP_FIELD:
+    case OFPACT_PUSH_VXLAN:
+    case OFPACT_POP_VXLAN:
     case OFPACT_SET_FIELD:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:

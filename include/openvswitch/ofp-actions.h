@@ -85,6 +85,8 @@ struct vl_mff_map;
     OFPACT(SET_L4_DST_PORT, ofpact_l4_port,     ofpact, "mod_tp_dst")   \
     OFPACT(REG_MOVE,        ofpact_reg_move,    ofpact, "move")         \
     OFPACT(SWAP_FIELD,      ofpact_swap_field,  ofpact, "swap")         \
+    OFPACT(PUSH_VXLAN,      ofpact_push_vxlan,  ofpact, "push_vxlan")   \
+    OFPACT(POP_VXLAN,       ofpact_null,   ofpact, "pop_vxlan")     \
     OFPACT(STACK_PUSH,      ofpact_stack,       ofpact, "push")         \
     OFPACT(STACK_POP,       ofpact_stack,       ofpact, "pop")          \
     OFPACT(DEC_TTL,         ofpact_cnt_ids,     cnt_ids, "dec_ttl")     \
@@ -533,6 +535,18 @@ struct ofpact_swap_field {
             struct ofpact ofpact;
             struct mf_subfield src;
             struct mf_subfield dst;
+    );
+};
+
+struct ofpact_push_vxlan {
+    OFPACT_PADDED_MEMBERS(
+            struct ofpact ofpact;
+            struct eth_addr eth_src;
+            struct eth_addr eth_dst;
+            ovs_be32 src_ipv4;
+            ovs_be32 dst_ipv4;
+            ovs_be32 vni;
+            ovs_be16 udp_src;
     );
 };
 

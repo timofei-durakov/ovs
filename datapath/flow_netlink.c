@@ -89,6 +89,8 @@ static bool actions_may_change_flow(const struct nlattr *actions)
 		case OVS_ACTION_ATTR_PUSH_MPLS:
 		case OVS_ACTION_ATTR_PUSH_NSH:
 		case OVS_ACTION_ATTR_PUSH_VLAN:
+		case OVS_ACTION_ATTR_PUSH_VXLAN:
+        case OVS_ACTION_ATTR_POP_VXLAN:
 		case OVS_ACTION_ATTR_SAMPLE:
 		case OVS_ACTION_ATTR_SET:
 		case OVS_ACTION_ATTR_SET_MASKED:
@@ -183,7 +185,8 @@ static bool match_validate(const struct sw_flow_match *match,
 			| (1ULL << OVS_KEY_ATTR_ARP)
 			| (1ULL << OVS_KEY_ATTR_ND)
 			| (1ULL << OVS_KEY_ATTR_MPLS)
-			| (1ULL << OVS_KEY_ATTR_NSH));
+			| (1ULL << OVS_KEY_ATTR_NSH)
+            | (1ULL << OVS_KEY_ATTR_VXLAN_VNI));
 
 	/* Always allowed mask fields. */
 	mask_allowed |= ((1ULL << OVS_KEY_ATTR_TUNNEL)
@@ -382,7 +385,8 @@ size_t ovs_key_attr_size(void)
 		+ nla_total_size(2)   /* OVS_KEY_ATTR_ETHERTYPE */
 		+ nla_total_size(40)  /* OVS_KEY_ATTR_IPV6 */
 		+ nla_total_size(2)   /* OVS_KEY_ATTR_ICMPV6 */
-		+ nla_total_size(28); /* OVS_KEY_ATTR_ND */
+		+ nla_total_size(28)  /* OVS_KEY_ATTR_ND */
+		+ nla_total_size(4);  /* OVS_KEY_ATTR_VXLAN_VNI */
 }
 
 static const struct ovs_len_tbl ovs_vxlan_ext_key_lens[OVS_VXLAN_EXT_MAX + 1] = {
@@ -449,6 +453,7 @@ static const struct ovs_len_tbl ovs_key_lens[OVS_KEY_ATTR_MAX + 1] = {
 		.len = sizeof(struct ovs_key_ct_tuple_ipv6) },
 	[OVS_KEY_ATTR_NSH]       = { .len = OVS_ATTR_NESTED,
 				     .next = ovs_nsh_key_attr_lens, },
+    [OVS_KEY_ATTR_VXLAN_VNI] = { .len = sizeof(u32)},
 };
 
 static bool check_attr_len(unsigned int attr_len, unsigned int expected_len)
@@ -3004,6 +3009,8 @@ static int __ovs_nla_copy_actions(struct net *net, const struct nlattr *attr,
 			[OVS_ACTION_ATTR_METER] = sizeof(u32),
 			[OVS_ACTION_ATTR_CLONE] = (u32)-1,
 			[OVS_ACTION_ATTR_CHECK_PKT_LEN] = (u32)-1,
+			[OVS_ACTION_ATTR_PUSH_VXLAN] = sizeof(struct ovs_action_push_vxlan),
+            [OVS_ACTION_ATTR_POP_VXLAN] = 0
 		};
 		const struct ovs_action_push_vlan *vlan;
 		int type = nla_type(a);
@@ -3067,6 +3074,12 @@ static int __ovs_nla_copy_actions(struct net *net, const struct nlattr *attr,
 				return -EINVAL;
 			vlan_tci = vlan->vlan_tci;
 			break;
+
+        case OVS_ACTION_ATTR_PUSH_VXLAN:
+            break;
+
+        case OVS_ACTION_ATTR_POP_VXLAN:
+            break;
 
 		case OVS_ACTION_ATTR_RECIRC:
 			break;

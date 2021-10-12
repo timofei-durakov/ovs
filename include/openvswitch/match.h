@@ -189,6 +189,8 @@ void match_set_mpls_ttl(struct match *, int idx, uint8_t);
 void match_set_tp_src(struct match *, ovs_be16);
 void match_set_mpls_lse(struct match *, int idx, ovs_be32 lse);
 void match_set_tp_src_masked(struct match *, ovs_be16 port, ovs_be16 mask);
+void match_set_vxlan_vni(struct match *, ovs_be32);
+void match_set_vxlan_vni_masked(struct match *, ovs_be32 vxlan_vni, ovs_be32 mask);
 void match_set_tp_dst(struct match *, ovs_be16);
 void match_set_tp_dst_masked(struct match *, ovs_be16 port, ovs_be16 mask);
 void match_set_tcp_flags(struct match *, ovs_be16);

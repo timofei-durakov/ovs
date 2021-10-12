@@ -320,6 +320,69 @@ netdev_tnl_ip_build_header(struct ovs_action_push_tnl *data,
 }
 
 static void *
+eth_build_header_for_vxlan(const struct ofpact_push_vxlan *a,
+                           struct ovs_action_push_tnl *data)
+{
+    uint16_t eth_proto = ETH_TYPE_IP;
+    struct eth_header *eth;
+
+    memset(data->header, 0, sizeof data->header);
+
+    eth = (struct eth_header *)data->header;
+    eth->eth_dst = a->eth_dst;
+    eth->eth_src = a->eth_src;
+    eth->eth_type = htons(eth_proto);
+    data->header_len = sizeof(struct eth_header);
+    return eth + 1;
+}
+
+static void *
+ip_build_header_for_vxlan(struct flow* flow OVS_UNUSED,
+                          const struct ofpact_push_vxlan *a,
+                          struct ovs_action_push_tnl *data)
+{
+    void *l3;
+
+    l3 = eth_build_header_for_vxlan(a, data);
+
+    struct ip_header *ip;
+
+    ip = (struct ip_header *) l3;
+
+    ip->ip_ihl_ver = IP_IHL_VER(5, 4);
+    ip->ip_tos = flow->tunnel.ip_tos;
+    ip->ip_ttl = flow->tunnel.ip_ttl;
+    ip->ip_proto = IPPROTO_UDP;
+    put_16aligned_be32(&ip->ip_src, a->src_ipv4);
+    put_16aligned_be32(&ip->ip_dst, a->dst_ipv4);
+
+    ip->ip_frag_off = (flow->tunnel.flags & FLOW_TNL_F_DONT_FRAGMENT) ?
+                      htons(IP_DF) : 0;
+
+    /* Checksum has already been zeroed by eth_build_header. */
+    ip->ip_csum = csum(ip, sizeof *ip);
+
+    data->header_len += IP_HEADER_LEN;
+    return ip + 1;
+
+}
+
+static void *
+udp_build_header_for_vxlan(struct flow* flow,
+                           const struct ofpact_push_vxlan *a,
+                           struct ovs_action_push_tnl *data)
+{
+    struct udp_header *udp;
+
+    udp = ip_build_header_for_vxlan(flow, a, data);
+    udp->udp_dst = htons(4789);
+    udp->udp_src = a->udp_src;
+
+    data->header_len += sizeof *udp;
+    return udp + 1;
+}
+
+static void *
 udp_build_header(struct netdev_tunnel_config *tnl_cfg,
                  struct ovs_action_push_tnl *data,
                  const struct netdev_tnl_build_header_params *params)
@@ -913,6 +976,22 @@ netdev_vxlan_pop_header(struct dp_packet *packet)
 err:
     dp_packet_delete(packet);
     return NULL;
+}
+
+int
+vxlan_build_header(struct flow* flow,
+                   const struct ofpact_push_vxlan *a,
+                   struct ovs_action_push_tnl *data) {
+    struct vxlanhdr *vxh;
+
+    vxh = udp_build_header_for_vxlan(flow, a, data);
+
+    put_16aligned_be32(&vxh->vx_flags, htonl(VXLAN_FLAGS));
+    put_16aligned_be32(&vxh->vx_vni, htonl(ntohl(a->vni) << 8));
+
+    data->header_len += sizeof *vxh;
+    data->tnl_type = OVS_VPORT_TYPE_VXLAN;
+    return 0;
 }
 
 int

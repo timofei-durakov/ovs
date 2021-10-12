@@ -62,6 +62,8 @@ char *str_to_connhelper(const char *str, uint16_t *alg) OVS_WARN_UNUSED_RESULT;
 /* Handy utility for parsing flows and actions. */
 bool ofputil_parse_key_value(char **stringp, char **keyp, char **valuep);
 
+bool ofputil_parse_key_value_vxlan(char **stringp, char **setter);
+
 #ifdef __cplusplus
 }
 #endif

@@ -262,6 +262,15 @@ eth_pop_vlan(struct dp_packet *packet)
     }
 }
 
+void push_vxlan(struct dp_packet *packet OVS_UNUSED, const struct ovs_action_push_vxlan *pushVxlan OVS_UNUSED) {
+
+}
+
+void pop_vxlan(struct dp_packet *packet OVS_UNUSED) {
+
+}
+
+
 /* Push Ethernet header onto 'packet' assuming it is layer 3 */
 void
 push_eth(struct dp_packet *packet, const struct eth_addr *dst,

@@ -4554,7 +4554,7 @@ r r c c c.
     </diagram>
     <field id="MFF_UDP_SRC" title="UDP Source Port"/>
     <field id="MFF_UDP_DST" title="UDP Destination Port"/>
-
+    <field id="MFF_VXLAN_VNI" title="VXLAN vni"/>
     <h2>SCTP</h2>
 
     <p>

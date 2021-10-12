@@ -22,6 +22,7 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 #include <sys/socket.h>
+#include <netdev-native-tnl.h>
 
 #include "bfd.h"
 #include "bitmap.h"
@@ -3512,6 +3513,31 @@ tnl_send_arp_request(struct xlate_ctx *ctx, const struct xport *out_dev,
 }
 
 static void
+propagate_tunnel_data_to_flow_for_vxlan__(struct flow *dst_flow,
+                                const struct flow *src_flow,
+                                struct eth_addr dmac, struct eth_addr smac,
+                                ovs_be32 s_ip, ovs_be32 d_ip,
+                                uint8_t nw_proto)
+{
+    dst_flow->dl_dst = dmac;
+    dst_flow->dl_src = smac;
+
+    dst_flow->packet_type = htonl(PT_ETH);
+    dst_flow->nw_dst = d_ip;
+    dst_flow->nw_src = s_ip;
+
+    dst_flow->nw_frag = 0; /* Tunnel packets are unfragmented. */
+    dst_flow->nw_tos = src_flow->tunnel.ip_tos;
+    dst_flow->nw_ttl = src_flow->tunnel.ip_ttl;
+    dst_flow->tp_dst = htons(4789);
+    dst_flow->tp_src = htons(4789);
+
+
+    dst_flow->dl_type = htons(ETH_TYPE_IP);
+    dst_flow->nw_proto = nw_proto;
+}
+
+static void
 propagate_tunnel_data_to_flow__(struct flow *dst_flow,
                                 const struct flow *src_flow,
                                 struct eth_addr dmac, struct eth_addr smac,
@@ -3546,6 +3572,26 @@ propagate_tunnel_data_to_flow__(struct flow *dst_flow,
         }
     }
     dst_flow->nw_proto = nw_proto;
+}
+
+static void
+propagate_tunnel_data_to_flow_for_vxlan(struct xlate_ctx *ctx, struct eth_addr dmac,
+                              struct eth_addr smac,
+                              ovs_be32 s_ip, ovs_be32 d_ip)
+{
+    struct flow *base_flow, *flow;
+    flow = &ctx->xin->flow;
+    base_flow = &ctx->base_flow;
+    uint8_t nw_proto = IPPROTO_UDP;
+
+    /*
+     * Update base_flow first followed by flow as the dst_flow gets modified
+     * in the function.
+     */
+    propagate_tunnel_data_to_flow_for_vxlan__(base_flow, flow, dmac, smac, s_ip, d_ip,
+                                    nw_proto);
+    propagate_tunnel_data_to_flow_for_vxlan__(flow, flow, dmac, smac, s_ip, d_ip,
+                                    nw_proto);
 }
 
 /*
@@ -5686,6 +5732,8 @@ reversible_actions(const struct ofpact *ofpacts, size_t ofpacts_len)
         case OFPACT_PUSH_VLAN:
         case OFPACT_REG_MOVE:
         case OFPACT_SWAP_FIELD:
+        case OFPACT_PUSH_VXLAN:
+        case OFPACT_POP_VXLAN:
         case OFPACT_RESUBMIT:
         case OFPACT_SAMPLE:
         case OFPACT_SET_ETH_DST:
@@ -6024,6 +6072,8 @@ freeze_unroll_actions(const struct ofpact *a, const struct ofpact *end,
         case OFPACT_CHECK_PKT_LARGER:
         case OFPACT_DELETE_FIELD:
         case OFPACT_SWAP_FIELD:
+        case OFPACT_PUSH_VXLAN:
+        case OFPACT_POP_VXLAN:
             /* These may not generate PACKET INs. */
             break;
 
@@ -6652,6 +6702,8 @@ recirc_for_mpls(const struct ofpact *a, struct xlate_ctx *ctx)
     case OFPACT_SET_L4_DST_PORT:
     case OFPACT_REG_MOVE:
     case OFPACT_SWAP_FIELD:
+    case OFPACT_PUSH_VXLAN:
+    case OFPACT_POP_VXLAN:
     case OFPACT_STACK_PUSH:
     case OFPACT_STACK_POP:
     case OFPACT_DEC_TTL:
@@ -6700,6 +6752,21 @@ xlate_ofpact_reg_move(struct xlate_ctx *ctx, const struct ofpact_reg_move *a)
 {
     mf_subfield_copy(&a->src, &a->dst, &ctx->xin->flow, ctx->wc);
     xlate_report_subfield(ctx, &a->dst);
+}
+
+static void
+xlate_ofpact_push_vxlan(OVS_UNUSED struct xlate_ctx *ctx, OVS_UNUSED const struct ofpact_push_vxlan *a)
+{
+    propagate_tunnel_data_to_flow_for_vxlan(ctx, a->eth_dst, a->eth_src,
+                                  a->src_ipv4, a->dst_ipv4);
+
+    odp_put_push_vxlan(ctx->odp_actions, a);
+}
+
+static void
+xlate_ofpact_pop_vxlan(OVS_UNUSED struct xlate_ctx *ctx)
+{
+    odp_put_pop_vxlan(ctx->odp_actions);
 }
 
 static void
@@ -6956,8 +7023,13 @@ do_xlate_actions(const struct ofpact *ofpacts, size_t ofpacts_len,
             break;
         case OFPACT_SWAP_FIELD:
             xlate_ofpact_swap_field(ctx, ofpact_get_SWAP_FIELD(a));
+                break;
+        case OFPACT_POP_VXLAN:
+            xlate_ofpact_pop_vxlan(ctx);
             break;
-
+        case OFPACT_PUSH_VXLAN:
+            xlate_ofpact_push_vxlan(ctx, ofpact_get_PUSH_VXLAN(a));
+            break;
         case OFPACT_SET_FIELD:
             set_field = ofpact_get_SET_FIELD(a);
             mf = set_field->field;
