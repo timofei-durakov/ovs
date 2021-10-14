@@ -528,7 +528,7 @@ static int push_vxlan(struct sk_buff *skb, struct sw_flow_key *key,
     ehdr = eth_hdr(skb);
     ether_addr_copy(ehdr->h_source, vxlan->addresses.eth_src);
     ether_addr_copy(ehdr->h_dest, vxlan->addresses.eth_dst);
-    ehdr->h_proto = skb->protocol;
+    ehdr->h_proto = htons(0x800);;
     skb_postpush_rcsum(skb, ehdr, sizeof(*ehdr));
     key->mac_proto = MAC_PROTO_ETHERNET;
     invalidate_flow_key(key);
