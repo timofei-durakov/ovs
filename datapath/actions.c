@@ -454,11 +454,39 @@ static void set_ip_addr(struct sk_buff *skb, struct iphdr *nh,
 }
 
 static int pop_vxlan(struct sk_buff *skb, struct sw_flow_key *key) {
+    struct ethhdr *eth_hdr;
     skb_pull_rcsum(skb, ETH_HLEN + sizeof (struct iphdr) + sizeof (struct udphdr) + sizeof (struct vxlanhdr));
     skb_reset_mac_header(skb);
     skb_reset_mac_len(skb);
-    skb_reset_network_header(skb);
-    skb_reset_transport_header(skb);
+    eth_hdr = skb_eth_hdr(skb);
+    switch(ntohs(eth_hdr->h_proto)) {
+        case ETH_P_IP:
+            skb_set_network_header(skb, ETH_HLEN);
+            skb_set_transport_header(skb, ETH_HLEN + sizeof (struct iphdr));
+            break;
+        case ETH_P_8021AD:
+        case ETH_P_8021Q: {
+            struct vlan_hdr * vlan_tag  = (struct vlan_hdr*) (eth_hdr + 1);
+            if (ETH_P_8021AD == ntohs(vlan_tag->h_vlan_encapsulated_proto)
+                || ETH_P_8021Q == ntohs(vlan_tag->h_vlan_encapsulated_proto)) {
+                skb_set_network_header(skb, ETH_HLEN + sizeof (struct vlan_hdr) * 2);
+                skb_set_transport_header(skb, ETH_HLEN + sizeof (struct vlan_hdr) * 2 + sizeof (struct iphdr));
+            } else {
+                skb_set_network_header(skb, ETH_HLEN + sizeof (struct vlan_hdr));
+                skb_set_transport_header(skb, ETH_HLEN + sizeof (struct vlan_hdr) + sizeof (struct iphdr));
+            }
+
+            break;
+        }
+        case ETH_P_IPV6:
+            skb_set_network_header(skb, ETH_HLEN);
+            skb_set_transport_header(skb, ETH_HLEN + sizeof (struct ipv6hdr));
+            break;
+        default:
+            skb_reset_network_header(skb);
+            skb_reset_transport_header(skb);
+            break;
+    }
     return 0;
 }
 
@@ -528,7 +556,7 @@ static int push_vxlan(struct sk_buff *skb, struct sw_flow_key *key,
     ehdr = eth_hdr(skb);
     ether_addr_copy(ehdr->h_source, vxlan->addresses.eth_src);
     ether_addr_copy(ehdr->h_dest, vxlan->addresses.eth_dst);
-    ehdr->h_proto = htons(0x800);;
+    ehdr->h_proto = htons(ETH_P_IP);
     skb_postpush_rcsum(skb, ehdr, sizeof(*ehdr));
     key->mac_proto = MAC_PROTO_ETHERNET;
     invalidate_flow_key(key);
